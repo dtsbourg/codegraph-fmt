@@ -13,9 +13,11 @@ from collections import namedtuple
 # CFG
 Config = namedtuple('Config', 'datapath name')
 cfg = Config(os.path.join('..', 'data'), 'code-sample')
-# END CFG
 
 path = os.path.join(cfg.datapath, cfg.name, 'raw')
+dumpdir = os.path.join(cfg.datapath, cfg.name, 'AST')
+# END CFG
+
 
 for file in os.listdir(path):
     if file.endswith(".py"):
@@ -23,4 +25,4 @@ for file in os.listdir(path):
         print("Processing file", f)
         with open(f, 'r') as myfile:
            data=myfile.read()
-        astpp.pdp(data, filename="test.py")
+        astpp.pdp(data, dumpdir=dumpdir)

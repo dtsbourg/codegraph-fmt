@@ -8,6 +8,8 @@ From http://alexleone.blogspot.co.uk/2010/01/python-ast-pretty-printer.html
 """
 
 from ast import *
+import joblib
+import os
 
 def dump(node, annotate_fields=True, include_attributes=False, indent='  '):
     """
@@ -46,10 +48,14 @@ def dump(node, annotate_fields=True, include_attributes=False, indent='  '):
         raise TypeError('expected AST, got %r' % node.__class__.__name__)
     return _format(node)
 
-def parseprint(code, filename="<string>", mode="exec", **kwargs):
+def parseprint(code, filename="<string>", dumpdir=None, mode="exec", **kwargs):
     """Parse some code from a string and pretty-print it."""
     node = parse(code, mode=mode)   # An ode to the code
-    print(dump(node, **kwargs))
+    ast_dump = dump(node, **kwargs)
+    with open(os.path.join(dumpdir, 'AST-str-dump.txt'), 'w') as f:
+        f.write(ast_dump)
+    joblib.dump(node, os.path.join(dumpdir, 'AST-bin-dump.ast'))
+    print(ast_dump)
 
 # Short name: pdp = parse, dump, print
 pdp = parseprint
