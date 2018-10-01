@@ -1,0 +1,245 @@
+Module(body=[
+    Expr(value=Str(s='\nA pretty-printing dump function for the ast module.  The code was copied from\nthe ast.dump function and modified slightly to pretty-print.\n\nAlex Leone (acleone ~AT~ gmail.com), 2010-01-30\n\nFrom http://alexleone.blogspot.co.uk/2010/01/python-ast-pretty-printer.html\n')),
+    ImportFrom(module='ast', names=[
+        alias(name='*', asname=None),
+      ], level=0),
+    FunctionDef(name='dump', args=arguments(args=[
+        arg(arg='node', annotation=None),
+        arg(arg='annotate_fields', annotation=None),
+        arg(arg='include_attributes', annotation=None),
+        arg(arg='indent', annotation=None),
+      ], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[
+        NameConstant(value=True),
+        NameConstant(value=False),
+        Str(s='  '),
+      ]), body=[
+        Expr(value=Str(s='\n    Return a formatted dump of the tree in *node*.  This is mainly useful for\n    debugging purposes.  The returned string will show the names and the values\n    for fields.  This makes the code impossible to evaluate, so if evaluation is\n    wanted *annotate_fields* must be set to False.  Attributes such as line\n    numbers and column offsets are not dumped by default.  If this is wanted,\n    *include_attributes* can be set to True.\n    ')),
+        FunctionDef(name='_format', args=arguments(args=[
+            arg(arg='node', annotation=None),
+            arg(arg='level', annotation=None),
+          ], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[
+            Num(n=0),
+          ]), body=[
+            If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[
+                Name(id='node', ctx=Load()),
+                Name(id='AST', ctx=Load()),
+              ], keywords=[]), body=[
+                Assign(targets=[
+                    Name(id='fields', ctx=Store()),
+                  ], value=ListComp(elt=Tuple(elts=[
+                    Name(id='a', ctx=Load()),
+                    Call(func=Name(id='_format', ctx=Load()), args=[
+                        Name(id='b', ctx=Load()),
+                        Name(id='level', ctx=Load()),
+                      ], keywords=[]),
+                  ], ctx=Load()), generators=[
+                    comprehension(target=Tuple(elts=[
+                        Name(id='a', ctx=Store()),
+                        Name(id='b', ctx=Store()),
+                      ], ctx=Store()), iter=Call(func=Name(id='iter_fields', ctx=Load()), args=[
+                        Name(id='node', ctx=Load()),
+                      ], keywords=[]), ifs=[], is_async=0),
+                  ])),
+                If(test=BoolOp(op=And(), values=[
+                    Name(id='include_attributes', ctx=Load()),
+                    Attribute(value=Name(id='node', ctx=Load()), attr='_attributes', ctx=Load()),
+                  ]), body=[
+                    Expr(value=Call(func=Attribute(value=Name(id='fields', ctx=Load()), attr='extend', ctx=Load()), args=[
+                        ListComp(elt=Tuple(elts=[
+                            Name(id='a', ctx=Load()),
+                            Call(func=Name(id='_format', ctx=Load()), args=[
+                                Call(func=Name(id='getattr', ctx=Load()), args=[
+                                    Name(id='node', ctx=Load()),
+                                    Name(id='a', ctx=Load()),
+                                  ], keywords=[]),
+                                Name(id='level', ctx=Load()),
+                              ], keywords=[]),
+                          ], ctx=Load()), generators=[
+                            comprehension(target=Name(id='a', ctx=Store()), iter=Attribute(value=Name(id='node', ctx=Load()), attr='_attributes', ctx=Load()), ifs=[], is_async=0),
+                          ]),
+                      ], keywords=[])),
+                  ], orelse=[]),
+                Return(value=Call(func=Attribute(value=Str(s=''), attr='join', ctx=Load()), args=[
+                    List(elts=[
+                        Attribute(value=Attribute(value=Name(id='node', ctx=Load()), attr='__class__', ctx=Load()), attr='__name__', ctx=Load()),
+                        Str(s='('),
+                        Call(func=Attribute(value=Str(s=', '), attr='join', ctx=Load()), args=[
+                            IfExp(test=Name(id='annotate_fields', ctx=Load()), body=GeneratorExp(elt=BinOp(left=Str(s='%s=%s'), op=Mod(), right=Name(id='field', ctx=Load())), generators=[
+                                comprehension(target=Name(id='field', ctx=Store()), iter=Name(id='fields', ctx=Load()), ifs=[], is_async=0),
+                              ]), orelse=GeneratorExp(elt=Name(id='b', ctx=Load()), generators=[
+                                comprehension(target=Tuple(elts=[
+                                    Name(id='a', ctx=Store()),
+                                    Name(id='b', ctx=Store()),
+                                  ], ctx=Store()), iter=Name(id='fields', ctx=Load()), ifs=[], is_async=0),
+                              ])),
+                          ], keywords=[]),
+                        Str(s=')'),
+                      ], ctx=Load()),
+                  ], keywords=[])),
+              ], orelse=[
+                If(test=Call(func=Name(id='isinstance', ctx=Load()), args=[
+                    Name(id='node', ctx=Load()),
+                    Name(id='list', ctx=Load()),
+                  ], keywords=[]), body=[
+                    Assign(targets=[
+                        Name(id='lines', ctx=Store()),
+                      ], value=List(elts=[
+                        Str(s='['),
+                      ], ctx=Load())),
+                    Expr(value=Call(func=Attribute(value=Name(id='lines', ctx=Load()), attr='extend', ctx=Load()), args=[
+                        GeneratorExp(elt=BinOp(left=BinOp(left=BinOp(left=Name(id='indent', ctx=Load()), op=Mult(), right=BinOp(left=Name(id='level', ctx=Load()), op=Add(), right=Num(n=2))), op=Add(), right=Call(func=Name(id='_format', ctx=Load()), args=[
+                            Name(id='x', ctx=Load()),
+                            BinOp(left=Name(id='level', ctx=Load()), op=Add(), right=Num(n=2)),
+                          ], keywords=[])), op=Add(), right=Str(s=',')), generators=[
+                            comprehension(target=Name(id='x', ctx=Store()), iter=Name(id='node', ctx=Load()), ifs=[], is_async=0),
+                          ]),
+                      ], keywords=[])),
+                    If(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[
+                        Name(id='lines', ctx=Load()),
+                      ], keywords=[]), ops=[
+                        Gt(),
+                      ], comparators=[
+                        Num(n=1),
+                      ]), body=[
+                        Expr(value=Call(func=Attribute(value=Name(id='lines', ctx=Load()), attr='append', ctx=Load()), args=[
+                            BinOp(left=BinOp(left=Name(id='indent', ctx=Load()), op=Mult(), right=BinOp(left=Name(id='level', ctx=Load()), op=Add(), right=Num(n=1))), op=Add(), right=Str(s=']')),
+                          ], keywords=[])),
+                      ], orelse=[
+                        AugAssign(target=Subscript(value=Name(id='lines', ctx=Load()), slice=Index(value=UnaryOp(op=USub(), operand=Num(n=1))), ctx=Store()), op=Add(), value=Str(s=']')),
+                      ]),
+                    Return(value=Call(func=Attribute(value=Str(s='\n'), attr='join', ctx=Load()), args=[
+                        Name(id='lines', ctx=Load()),
+                      ], keywords=[])),
+                  ], orelse=[]),
+              ]),
+            Return(value=Call(func=Name(id='repr', ctx=Load()), args=[
+                Name(id='node', ctx=Load()),
+              ], keywords=[])),
+          ], decorator_list=[], returns=None),
+        If(test=UnaryOp(op=Not(), operand=Call(func=Name(id='isinstance', ctx=Load()), args=[
+            Name(id='node', ctx=Load()),
+            Name(id='AST', ctx=Load()),
+          ], keywords=[])), body=[
+            Raise(exc=Call(func=Name(id='TypeError', ctx=Load()), args=[
+                BinOp(left=Str(s='expected AST, got %r'), op=Mod(), right=Attribute(value=Attribute(value=Name(id='node', ctx=Load()), attr='__class__', ctx=Load()), attr='__name__', ctx=Load())),
+              ], keywords=[]), cause=None),
+          ], orelse=[]),
+        Return(value=Call(func=Name(id='_format', ctx=Load()), args=[
+            Name(id='node', ctx=Load()),
+          ], keywords=[])),
+      ], decorator_list=[], returns=None),
+    FunctionDef(name='parseprint', args=arguments(args=[
+        arg(arg='code', annotation=None),
+        arg(arg='filename', annotation=None),
+        arg(arg='mode', annotation=None),
+      ], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=arg(arg='kwargs', annotation=None), defaults=[
+        Str(s='<string>'),
+        Str(s='exec'),
+      ]), body=[
+        Expr(value=Str(s='Parse some code from a string and pretty-print it.')),
+        Assign(targets=[
+            Name(id='node', ctx=Store()),
+          ], value=Call(func=Name(id='parse', ctx=Load()), args=[
+            Name(id='code', ctx=Load()),
+          ], keywords=[
+            keyword(arg='mode', value=Name(id='mode', ctx=Load())),
+          ])),
+        Expr(value=Call(func=Name(id='print', ctx=Load()), args=[
+            Call(func=Name(id='dump', ctx=Load()), args=[
+                Name(id='node', ctx=Load()),
+              ], keywords=[
+                keyword(arg=None, value=Name(id='kwargs', ctx=Load())),
+              ]),
+          ], keywords=[])),
+      ], decorator_list=[], returns=None),
+    Assign(targets=[
+        Name(id='pdp', ctx=Store()),
+      ], value=Name(id='parseprint', ctx=Load())),
+    FunctionDef(name='load_ipython_extension', args=arguments(args=[
+        arg(arg='ip', annotation=None),
+      ], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=[
+        ImportFrom(module='IPython.core.magic', names=[
+            alias(name='Magics', asname=None),
+            alias(name='magics_class', asname=None),
+            alias(name='cell_magic', asname=None),
+          ], level=0),
+        ImportFrom(module='IPython.core', names=[
+            alias(name='magic_arguments', asname=None),
+          ], level=0),
+        ClassDef(name='AstMagics', bases=[
+            Name(id='Magics', ctx=Load()),
+          ], keywords=[], body=[
+            FunctionDef(name='dump_ast', args=arguments(args=[
+                arg(arg='self', annotation=None),
+                arg(arg='line', annotation=None),
+                arg(arg='cell', annotation=None),
+              ], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=[
+                Expr(value=Str(s='Parse the code in the cell, and pretty-print the AST.')),
+                Assign(targets=[
+                    Name(id='args', ctx=Store()),
+                  ], value=Call(func=Attribute(value=Name(id='magic_arguments', ctx=Load()), attr='parse_argstring', ctx=Load()), args=[
+                    Attribute(value=Name(id='self', ctx=Load()), attr='dump_ast', ctx=Load()),
+                    Name(id='line', ctx=Load()),
+                  ], keywords=[])),
+                Expr(value=Call(func=Name(id='parseprint', ctx=Load()), args=[
+                    Name(id='cell', ctx=Load()),
+                  ], keywords=[
+                    keyword(arg='mode', value=Attribute(value=Name(id='args', ctx=Load()), attr='mode', ctx=Load())),
+                  ])),
+              ], decorator_list=[
+                Call(func=Attribute(value=Name(id='magic_arguments', ctx=Load()), attr='magic_arguments', ctx=Load()), args=[], keywords=[]),
+                Call(func=Attribute(value=Name(id='magic_arguments', ctx=Load()), attr='argument', ctx=Load()), args=[
+                    Str(s='-m'),
+                    Str(s='--mode'),
+                  ], keywords=[
+                    keyword(arg='default', value=Str(s='exec')),
+                    keyword(arg='help', value=Str(s='The mode in which to parse the code. Can be exec (the default), eval or single.')),
+                  ]),
+                Name(id='cell_magic', ctx=Load()),
+              ], returns=None),
+          ], decorator_list=[
+            Name(id='magics_class', ctx=Load()),
+          ]),
+        Expr(value=Call(func=Attribute(value=Name(id='ip', ctx=Load()), attr='register_magics', ctx=Load()), args=[
+            Name(id='AstMagics', ctx=Load()),
+          ], keywords=[])),
+      ], decorator_list=[], returns=None),
+    If(test=Compare(left=Name(id='__name__', ctx=Load()), ops=[
+        Eq(),
+      ], comparators=[
+        Str(s='__main__'),
+      ]), body=[
+        Import(names=[
+            alias(name='sys', asname=None),
+            alias(name='tokenize', asname=None),
+          ]),
+        For(target=Name(id='filename', ctx=Store()), iter=Subscript(value=Attribute(value=Name(id='sys', ctx=Load()), attr='argv', ctx=Load()), slice=Slice(lower=Num(n=1), upper=None, step=None), ctx=Load()), body=[
+            Expr(value=Call(func=Name(id='print', ctx=Load()), args=[
+                BinOp(left=Str(s='='), op=Mult(), right=Num(n=50)),
+              ], keywords=[])),
+            Expr(value=Call(func=Name(id='print', ctx=Load()), args=[
+                Str(s='AST tree for'),
+                Name(id='filename', ctx=Load()),
+              ], keywords=[])),
+            Expr(value=Call(func=Name(id='print', ctx=Load()), args=[
+                BinOp(left=Str(s='='), op=Mult(), right=Num(n=50)),
+              ], keywords=[])),
+            With(items=[
+                withitem(context_expr=Call(func=Attribute(value=Name(id='tokenize', ctx=Load()), attr='open', ctx=Load()), args=[
+                    Name(id='filename', ctx=Load()),
+                  ], keywords=[]), optional_vars=Name(id='f', ctx=Store())),
+              ], body=[
+                Assign(targets=[
+                    Name(id='fstr', ctx=Store()),
+                  ], value=Call(func=Attribute(value=Name(id='f', ctx=Load()), attr='read', ctx=Load()), args=[], keywords=[])),
+              ]),
+            Expr(value=Call(func=Name(id='parseprint', ctx=Load()), args=[
+                Name(id='fstr', ctx=Load()),
+              ], keywords=[
+                keyword(arg='filename', value=Name(id='filename', ctx=Load())),
+                keyword(arg='include_attributes', value=NameConstant(value=True)),
+              ])),
+            Expr(value=Call(func=Name(id='print', ctx=Load()), args=[], keywords=[])),
+          ], orelse=[]),
+      ], orelse=[]),
+  ])
