@@ -7,7 +7,6 @@ License: CC-BY 4.0
 """
 
 import joblib
-import astpp
 import os
 from collections import namedtuple
 import astor
@@ -37,7 +36,7 @@ for idx,p in enumerate(paths):
     ast_dump_file = os.path.join(dumpdir, save_file+'.ast')
     utils.save(ast=parsed_ast, filename=ast_dump_file, format='pickle')
 
-    ast_dump = astpp.dump(parsed_ast)
+    ast_dump = astor.dump_tree(parsed_ast)
     ast_dump_file = os.path.join(dumpdir, save_file+'.txt')
     utils.save(ast=ast_dump, filename=ast_dump_file, format='txt')
 

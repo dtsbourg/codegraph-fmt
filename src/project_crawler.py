@@ -20,6 +20,7 @@ def crawl(path, verbose=False):
             if filename.endswith(".py"):
                 p = os.path.join(root,filename)
                 ps.append(p)
-        print("[CRAWL]  --- Processed files {0} in {1}".format(len(filenames), root))
+        print("[CRAWL]  --- Processed {0} files in {1}".format(len(filenames), root))
     print()
     return ps
+ 
