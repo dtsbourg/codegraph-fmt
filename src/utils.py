@@ -11,9 +11,13 @@ License: CC-BY 4.0
 """
 
 import pickle
-
+import os
 
 def save(ast, filename, format='pickle'):
+    directory = filename.split('/')[:-1]
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        
     if format=='pickle':
         with open(filename, 'wb') as handle:
             pickle.dump(ast, handle, protocol=pickle.HIGHEST_PROTOCOL)
