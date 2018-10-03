@@ -27,11 +27,21 @@ import ast_transformer
 import utils
 
 paths = project_crawler.crawl(path, verbose=cfg.verbose)
-for p in paths:
+for idx,p in enumerate(paths):
+    if cfg.verbose:
+        print("[MAIN] Processing path", p)
+    parsed_file = str(os.path.basename(p))
+    save_file = 'AST-bin-dump-'+parsed_file
+
     parsed_ast = file_parser.parse(p, verbose=cfg.verbose)
-    ast_dump_file = os.path.join(dumpdir, 'AST-bin-dump-'+str(os.path.basename(p))+'.ast')
+    ast_dump_file = os.path.join(dumpdir, save_file+'.ast')
     utils.save(ast=parsed_ast, filename=ast_dump_file, format='pickle')
 
     ast_dump = astpp.dump(parsed_ast)
-    ast_dump_file = os.path.join(dumpdir, 'AST-bin-dump-'+str(os.path.basename(p))+'.txt')
+    ast_dump_file = os.path.join(dumpdir, save_file+'.txt')
     utils.save(ast=ast_dump, filename=ast_dump_file, format='txt')
+
+    print("\r[MAIN]  --- Saving parsed AST for file {0}/{1} ...".format(idx+1,len(paths)), end='\r')
+print()
+print("[MAIN]  --- Saved parsed AST for {0} files in {1}.".format(len(paths), dumpdir))
+print()

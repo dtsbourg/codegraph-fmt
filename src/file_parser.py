@@ -14,6 +14,4 @@ import os
 import astor
 
 def parse(filename, verbose=False):
-    if verbose:
-        print("[READER] Processing file", filename)
     return astor.code_to_ast.parse_file(filename)
