@@ -17,7 +17,7 @@ import astor
 Config = namedtuple('Config', 'datapath name')
 cfg = Config(os.path.join('..', 'data'), 'keras-example')
 
-path = os.path.join(cfg.datapath, cfg.name, 'raw')
+path = os.path.join(cfg.datapath, cfg.name, 'keras')
 dumpdir = os.path.join(cfg.datapath, cfg.name, 'AST')
 # END CFG
 
