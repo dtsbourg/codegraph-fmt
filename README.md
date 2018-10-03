@@ -66,7 +66,7 @@ action for now:
 2. Parse the files to generate a valid AST (done with [`astor`](https://astor.readthedocs.io))
 3. Save the generated AST in two formats
     1. `.txt`: Pretty-printed string representation
-    2. `.ast`: Pickle holding a valid `AST` python object
+    2. `.ast`: Pickle holding a valid `AST` Python object
 
 ### 3. Manipulating the generated ASTs
 
