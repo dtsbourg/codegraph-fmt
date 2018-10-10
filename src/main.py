@@ -14,9 +14,9 @@ import astor
 
 # CFG
 Config = namedtuple('Config', 'datapath name verbose')
-cfg = Config(os.path.join('..', 'data'), 'keras-example', False)
+cfg = Config(os.path.join('..', 'data'), 'code-sample', False)
 
-path = os.path.join(cfg.datapath, cfg.name, 'keras')
+path = os.path.join(cfg.datapath, cfg.name, 'raw')
 dumpdir = os.path.join(cfg.datapath, cfg.name, 'AST')
 # END CFG
 
@@ -24,6 +24,7 @@ import file_parser
 import project_crawler
 import ast_transformer
 import utils
+import ast_networkx
 
 paths = project_crawler.crawl(path, verbose=cfg.verbose)
 for idx,p in enumerate(paths):
@@ -37,10 +38,15 @@ for idx,p in enumerate(paths):
     utils.save(ast=parsed_ast, filename=ast_dump_file, format='pickle')
 
     ast_dump = astor.dump_tree(parsed_ast)
-    ast_dump_file = os.path.join(dumpdir, save_file+'.txt')
-    utils.save(ast=ast_dump, filename=ast_dump_file, format='txt')
+    ast_dump_file_txt = os.path.join(dumpdir, save_file+'.txt')
+    utils.save(ast=ast_dump, filename=ast_dump_file_txt, format='txt')
 
     print("\r[MAIN]  --- Saving parsed AST for file {0}/{1} ...".format(idx+1,len(paths)), end='\r')
 print()
 print("[MAIN]  --- Saved parsed AST for {0} files in {1}.".format(len(paths), dumpdir))
 print()
+
+ast_networkx.generate_json(ast_dump_file)
+
+walker = ast_transformer.v()
+walker.visit(parsed_ast)
