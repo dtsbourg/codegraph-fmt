@@ -1,17 +1,31 @@
+"""
+`ast_networkx.py`
+-------------------
+
+Transforming ASTs into networkx graphs.
+
+@author: Thao Nguyen (@thaonguen19)
+
+License: CC-BY 4.0
+"""
+
 import utils
 import networkx as nx
 import ast
 import json
 
-data_path = '/lfs/hyperion3/0/thaonguyen/SAGE-fmt/data/code-sample/AST/'
+# TODO pass as arguments from main.py
+data_path = '../data/code-sample/AST/'
 ast_path = data_path + 'AST-bin-dump.ast'
 
 def generate_json(ast_path):
+    # TODO: Docstring + logging
     tree = utils.load(ast_path)
+    # TODO: use a visitor instead of walk + persistent set
     all_nodes = list(ast.walk(tree)) # BFS traversal
     all_nodes_set = set(all_nodes)
 
-    DG = nx.DiGraph()
+    DG = nx.DiGraph() # No need for directed graph
     id_map_dict = {}
     ast_id_mapping = {}
     curr_id = 0
