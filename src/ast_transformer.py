@@ -11,7 +11,8 @@ License: CC-BY 4.0
 
 import astor
 import networkx as nx
-
+import ast
+import ast_utils
 
 class SAGEWalker(astor.TreeWalk):
     '''
@@ -34,3 +35,17 @@ class SAGEWalker(astor.TreeWalk):
         Dump the indexed AST to the appropriate files.
         '''
         raise NotImplementedError
+
+
+class v(ast.NodeVisitor):
+    '''
+    Example subclass of a visitor.
+
+    TODO: add state to the visitor subclass to keep a stack of visited nodes.
+    '''
+    def generic_visit(self, node):
+        '''
+        Is called upon visit to every node.
+        '''
+        print(type(node), ast_utils.get_token_id(node), ast_utils.get_token_class_id(node))
+        ast.NodeVisitor.generic_visit(self, node)
