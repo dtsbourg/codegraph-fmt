@@ -23,4 +23,3 @@ def crawl(path, verbose=False):
         print("[CRAWL]  --- Processed {0} files in {1}".format(len(filenames), root))
     print()
     return ps
- 
