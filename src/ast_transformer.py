@@ -12,7 +12,7 @@ License: CC-BY 4.0
 import astor
 import networkx as nx
 import ast
-import ast_utils
+#import ast_utils
 
 class SAGEWalker(astor.TreeWalk):
     '''
@@ -49,8 +49,8 @@ class ASTVisitor(ast.NodeVisitor):
         '''
         Is called upon visit to every node.
         '''
-        if not node.visited:
+        if not hasattr(node, 'visited'):
             self.nodes_stack.append(node)
             node.visited = True
-            print(type(node), ast_utils.get_token_id(node), ast_utils.get_token_class_id(node))
+            print(type(node))#, ast_utils.get_token_id(node), ast_utils.get_token_class_id(node))
         ast.NodeVisitor.generic_visit(self, node)

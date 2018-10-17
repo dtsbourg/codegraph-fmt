@@ -19,9 +19,6 @@ from ast_transformer import ASTVisitor
 def generate_json(ast_path, save_dir):
     print("[AST_NETWORKX] Converting ast to json files...")
     tree = utils.load(ast_path)
-    for node in ast.walk(tree):
-        node.visited = False
-
     G = nx.Graph() 
     id_map_dict = {}
     ast_id_mapping = {}
@@ -34,7 +31,6 @@ def generate_json(ast_path, save_dir):
         id_map_dict[i] = i
         for child in ast.iter_child_nodes(node):
             G.add_edge(i, visitor.nodes_stack.index(child))
-    print(id_map_dict)
     with open(os.path.join(save_dir, 'id_map.json'), 'w') as fout:
         fout.write(json.dumps(id_map_dict))
     with open(os.path.join(save_dir, 'G.json'), 'w') as fout:
