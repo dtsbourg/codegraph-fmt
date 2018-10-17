@@ -4,7 +4,7 @@
 
 Used to manipulated parsed ASTs.
 
-@author: Dylan Bourgeois (@dtsbourg)
+@author: Dylan Bourgeois (@dtsbourg), Thao Nguyen (@thaonguyen19)
 
 License: CC-BY 4.0
 """
@@ -37,15 +37,20 @@ class SAGEWalker(astor.TreeWalk):
         raise NotImplementedError
 
 
-class v(ast.NodeVisitor):
+class ASTVisitor(ast.NodeVisitor):
     '''
     Example subclass of a visitor.
-
-    TODO: add state to the visitor subclass to keep a stack of visited nodes.
     '''
+    def __init__(self):
+        super().__init__()
+        self.nodes_stack = []
+
     def generic_visit(self, node):
         '''
         Is called upon visit to every node.
         '''
-        print(type(node), ast_utils.get_token_id(node), ast_utils.get_token_class_id(node))
+        if not node.visited:
+            self.nodes_stack.append(node)
+            node.visited = True
+            print(type(node), ast_utils.get_token_id(node), ast_utils.get_token_class_id(node))
         ast.NodeVisitor.generic_visit(self, node)

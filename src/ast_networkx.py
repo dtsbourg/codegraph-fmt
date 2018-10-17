@@ -4,7 +4,7 @@
 
 Transforming ASTs into networkx graphs.
 
-@author: Thao Nguyen (@thaonguen19)
+@author: Thao Nguyen (@thaonguyen19)
 
 License: CC-BY 4.0
 """
@@ -13,35 +13,32 @@ import utils
 import networkx as nx
 import ast
 import json
+import os
+from ast_transformer import ASTVisitor
 
-# TODO pass as arguments from main.py
-data_path = '../data/code-sample/AST/'
-ast_path = data_path + 'AST-bin-dump.ast'
-
-def generate_json(ast_path):
-    # TODO: Docstring + logging
+def generate_json(ast_path, save_dir):
+    print("[AST_NETWORKX] Converting ast to json files...")
     tree = utils.load(ast_path)
-    # TODO: use a visitor instead of walk + persistent set
-    all_nodes = list(ast.walk(tree)) # BFS traversal
-    all_nodes_set = set(all_nodes)
+    for node in ast.walk(tree):
+        node.visited = False
 
-    DG = nx.DiGraph() # No need for directed graph
+    G = nx.Graph() 
     id_map_dict = {}
     ast_id_mapping = {}
-    curr_id = 0
-    for node in all_nodes_set:
-        DG.add_node(curr_id)
-        ast_id_mapping[node] = curr_id
-        id_map_dict[str(curr_id)] = curr_id
-        curr_id += 1
 
-    for node in all_nodes_set:
+    visitor = ASTVisitor()
+    visitor.visit(tree)
+    print(len(visitor.nodes_stack))
+    for i, node in enumerate(visitor.nodes_stack):
+        G.add_node(i)
+        id_map_dict[i] = i
         for child in ast.iter_child_nodes(node):
-            #DG.add_node(child)
-            DG.add_edge(ast_id_mapping[node], ast_id_mapping[child])
-
-    #n_nodes = len(list(DG.nodes))
-    with open(data_path + 'id_map.json', 'w') as fout:
+            G.add_edge(i, visitor.nodes_stack.index(child))
+    print(id_map_dict)
+    with open(os.path.join(save_dir, 'id_map.json'), 'w') as fout:
         fout.write(json.dumps(id_map_dict))
-    with open(data_path + 'G.json', 'w') as fout:
-        fout.write(json.dumps(nx.json_graph.node_link_data(DG)))
+    with open(os.path.join(save_dir, 'G.json'), 'w') as fout:
+        fout.write(json.dumps(nx.json_graph.node_link_data(G)))
+
+if __name__ == '__main__': #test
+    generate_json('../data/code-sample/AST/AST-bin-dump.ast', '../data/code-sample/AST/')

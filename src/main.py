@@ -47,6 +47,3 @@ print("[MAIN]  --- Saved parsed AST for {0} files in {1}.".format(len(paths), du
 print()
 
 ast_networkx.generate_json(ast_dump_file)
-
-walker = ast_transformer.v()
-walker.visit(parsed_ast)
