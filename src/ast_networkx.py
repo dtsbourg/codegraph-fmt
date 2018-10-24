@@ -18,27 +18,37 @@ import numpy as np
 from ast_transformer import ASTVisitor
 from feature_utils import FeatureExtractor
 
-def generate_json(ast_path, save_dir):
-    print("[AST_NETWORKX] Converting ast to json files...")
+def generate_json(ast_path, save_dir, verbose=False):
+    print("[AST_NX] Converting AST to .json files...")
+
+    # Initialise tree and maps
     tree = utils.load(ast_path)
-    G = nx.Graph() 
+    G = nx.Graph()
     id_map_dict = {}
     ast_id_mapping = {}
 
+    # Initialise visitor
     visitor = ASTVisitor()
     visitor.visit(tree)
-    print(len(visitor.nodes_stack))
+
+    print()
+    print("[AST_NX] Visited", len(visitor.nodes_stack), "nodes.")
+
+    # Initialise feature extractor
     extractor = FeatureExtractor()
     features_array = []
 
-    for i, node in enumerate(visitor.nodes_stack):
-        #print(i, node.graph_id) 
-        G.add_node(i)
+    # Enumerate the visited nodes
+    for idx, node in enumerate(visitor.nodes_stack):
+        print("\r[AST_NX]  --- Generating node feature vectors {0}/{1} ...".format(idx+1,len(visitor.nodes_stack)), end='\r')
+        G.add_node(idx)
         features_array.append(extractor.get_node_type(node))
-        id_map_dict[i] = i
+        id_map_dict[idx] = idx
         for child in ast.iter_child_nodes(node):
-            G.add_edge(i, visitor.nodes_stack.index(child))
-    
+            G.add_edge(idx, visitor.nodes_stack.index(child))
+
+    print()
+
     features_array = np.vstack(features_array)
     # one hot conversion
     n_types = np.max(features_array) + 1

@@ -45,13 +45,15 @@ class ASTVisitor(ast.NodeVisitor):
         super().__init__()
         self.nodes_stack = []
 
-    def generic_visit(self, node):
+    def generic_visit(self, node, verbose=False):
         '''
         Is called upon visit to every node.
         '''
         if not hasattr(node, 'visited'):
             node.graph_id = len(self.nodes_stack)
             self.nodes_stack.append(node)
+
             node.visited = True
-            print(type(node), ast_utils.get_token_id(node), ast_utils.get_token_class_id(node))
+            if verbose:
+                print(type(node), ast_utils.get_token_id(node), ast_utils.get_token_class_id(node))
         ast.NodeVisitor.generic_visit(self, node)
