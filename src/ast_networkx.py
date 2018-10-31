@@ -48,7 +48,7 @@ def generate_json(all_ast_paths, save_dir, verbose): #all_ast_path is a list of 
         last_full_graph_node_count = node_count
  
     if len(all_ast_paths) > 1: # add virtual root node
-        G.add(node_count)
+        G.add_node(node_count)
         features_array.append(-1)
         for top_node in all_top_nodes:
             G.add_edge(node_count, top_node)

@@ -16,10 +16,11 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--verbose", default=False, type=bool,  dest="verbose")
 parser.add_argument("--datapath", type=str,  dest="datapath", help='path to data folder')
+parser.add_argument("--rawpath", type=str, default="raw", dest="rawpath", help='name of raw code submodule')
 parser.add_argument("--name", type=str, dest="name", help='name of codebase')
 cfg = parser.parse_args()
 
-path = os.path.join(cfg.datapath, cfg.name, 'raw')
+path = os.path.join(cfg.datapath, cfg.name, cfg.rawpath)
 dumpdir = os.path.join(cfg.datapath, cfg.name, 'AST')
 #print(path, dumpdir)
 # END CFG
