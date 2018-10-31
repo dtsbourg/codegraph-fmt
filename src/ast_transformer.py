@@ -41,9 +41,11 @@ class ASTVisitor(ast.NodeVisitor):
     '''
     Example subclass of a visitor.
     '''
-    def __init__(self):
+    def __init__(self, verbose):
         super().__init__()
+        self.verbose = verbose
         self.nodes_stack = []
+        self.feature_list = []
 
     def generic_visit(self, node):
         '''
@@ -52,6 +54,8 @@ class ASTVisitor(ast.NodeVisitor):
         if not hasattr(node, 'visited'):
             #node.graph_id = len(self.nodes_stack)
             self.nodes_stack.append(node)
+            self.feature_list.append(ast_utils.get_token_id(node))
             node.visited = True
-            #print(type(node), ast_utils.get_token_id(node), ast_utils.get_token_class_id(node))
+            if self.verbose:
+                print(type(node), ast_utils.get_token_id(node), ast_utils.get_token_class_id(node))
         ast.NodeVisitor.generic_visit(self, node)

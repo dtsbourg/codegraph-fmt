@@ -52,4 +52,4 @@ print()
 print("[MAIN]  --- Saved parsed AST for {0} files in {1}.".format(len(paths), dumpdir))
 print()
 
-ast_networkx.generate_json(all_ast_dump, dumpdir)
+ast_networkx.generate_json(all_ast_dump, dumpdir, cfg.verbose)
