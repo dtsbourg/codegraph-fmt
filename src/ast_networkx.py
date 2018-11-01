@@ -17,9 +17,9 @@ import os
 import numpy as np
 from ast_transformer import ASTVisitor
 
-def generate_json(all_ast_paths, save_dir, verbose): #all_ast_path is a list of asts constructed from each file crawled
+def generate_json(ast_dir, save_dir, verbose): #all_ast_path is a list of asts constructed from each file crawled
     print("[AST_NX] Converting ast to json files...")
-    
+
     # Initialise tree and maps
     all_top_nodes = []
     node_count = 0
@@ -27,11 +27,13 @@ def generate_json(all_ast_paths, save_dir, verbose): #all_ast_path is a list of 
     G = nx.Graph()
     id_map_dict = {}
     ast_id_mapping = {}
-    
-    features_array = []
-    for ast_path in all_ast_paths:
-        tree = utils.load(ast_path)
 
+    features_array = []
+
+    print(ast_dir)
+    
+    for ast_path in ast_dir:
+        tree = utils.load(ast_path)
         visitor = ASTVisitor(verbose)
         visitor.visit(tree)
         print("[AST_NX] Visited ", ast_path, " found ", len(visitor.nodes_stack), " nodes")
@@ -46,8 +48,8 @@ def generate_json(all_ast_paths, save_dir, verbose): #all_ast_path is a list of 
                 G.add_edge(node_count, last_full_graph_node_count + visitor.nodes_stack.index(child)) # child may be lower down the stack
             node_count += 1
         last_full_graph_node_count = node_count
- 
-    if len(all_ast_paths) > 1: # add virtual root node
+
+    if len(ast_dir) > 1: # add virtual root node
         G.add_node(node_count)
         features_array.append(-1)
         for top_node in all_top_nodes:
@@ -55,7 +57,7 @@ def generate_json(all_ast_paths, save_dir, verbose): #all_ast_path is a list of 
         node_count += 1
 
     print("[AST_NX] Found ", node_count, " nodes in total")
-    
+
     features_array = np.array(features_array)
     # one hot conversion
     n_types = np.max(features_array) + 1 - np.min(features_array)

@@ -52,10 +52,7 @@ class ASTVisitor(ast.NodeVisitor):
         Is called upon visit to every node.
         '''
         if not hasattr(node, 'visited'):
-            #node.graph_id = len(self.nodes_stack)
             self.nodes_stack.append(node)
             self.feature_list.append(ast_utils.get_token_id(node))
             node.visited = True
-            if self.verbose:
-                print(type(node), ast_utils.get_token_id(node), ast_utils.get_token_class_id(node))
         ast.NodeVisitor.generic_visit(self, node)
