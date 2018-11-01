@@ -13,16 +13,17 @@ import argparse
 
 
 # CFG
-parser = argparse.ArgumentParser()
-parser.add_argument("--verbose", default=False, type=bool,  dest="verbose")
-parser.add_argument("--datapath", type=str,  dest="datapath", help='path to data folder')
-parser.add_argument("--rawpath", type=str, default="raw", dest="rawpath", help='name of raw code submodule')
-parser.add_argument("--name", type=str, dest="name", help='name of codebase')
+parser = argparse.ArgumentParser(description="Configure the AST generation and parsing script.",
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                 
+parser.add_argument("--verbose", default=False, action="store_true", dest="verbose")
+parser.add_argument("-d", "--datadir",    type=str, default="../data",      dest="datadir",    help="Path to the top level data directory.")
+parser.add_argument("-n", "--name",       type=str, default="code-sample",  dest="name",       help="Identifier for the mined directory.")
+parser.add_argument("-c", "--codefolder", type=str, default="raw",          dest="codefolder", help="Raw code folder identifier.")
 cfg = parser.parse_args()
 
-path = os.path.join(cfg.datapath, cfg.name, cfg.rawpath)
-dumpdir = os.path.join(cfg.datapath, cfg.name, 'AST')
-#print(path, dumpdir)
+path = os.path.join(cfg.datadir, cfg.name, cfg.rawpath)
+dumpdir = os.path.join(cfg.datadir, cfg.name, 'graph')
 # END CFG
 
 import file_parser
