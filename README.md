@@ -70,11 +70,15 @@ action for now:
 
 ### 3. Manipulating the generated ASTs
 
-> TODO: This will be done in the `ast_transformer.py` module.
->       `astor` should provide the required methods for traversing the AST.
->       This module should just do some bookkeeping on top of this.
->       The output should be GraphSAGE compatible `.json` representations
->       of the source code graph.
+Run main.py that first crawls all the python files in the raw code directory, constructs an AST for each file and pass the list of ASTs to generate_json() function in ast_networkx.py, which in turn traverses each AST in DFS manner, extracts features (AST node type), converts the AST into a networkx graph and finally merges all the graphs together into one.
+```
+SAGE-fmt/src> python main.py --datapath [path to data folder] --name [name of folder containing codebase] --rawpath [name of folder containing raw code] --verbose [a bool value]
+```
+(Optional) To profile the computation cost of the process, run the script with cProfile flag and save the output into a txt file that can later be parsed with pstats:
+```
+SAGE-fmt/src> python -m cProfile -o [output txt file] main.py [arguments as mentioned above]
+SAGE-fmt/src> python parse_profiling_output.py > [readable output file]
+```
 
 #### The GraphSAGE Format
 
