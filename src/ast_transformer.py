@@ -53,6 +53,9 @@ class ASTVisitor(ast.NodeVisitor):
         '''
         if not hasattr(node, 'visited'):
             self.nodes_stack.append(node)
-            self.feature_list.append(ast_utils.get_token_id(node))
+            token_id = ast_utils.get_token_id(node)
+            if token_id == -1:
+                print("[WARNING] --- Found unkown token", node)
+            self.feature_list.append(token_id)
             node.visited = True
         ast.NodeVisitor.generic_visit(self, node)
