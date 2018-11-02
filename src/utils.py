@@ -12,6 +12,7 @@ License: CC-BY 4.0
 
 import pickle
 import os
+import numpy as np
 
 import project_crawler
 
@@ -57,3 +58,10 @@ def load_asts(path, verbose=False):
     except:
         print("[ERROR] Could not load pre-generated ASTs from", path, ".")
         print("[ERROR] Please run again with the --preprocess flag enabled.")
+
+def one_hot_encoder(x, size):
+    x = np.array(x)
+    n_types = np.max(x) + 1 - np.min(x)
+    x_one_hot = np.zeros((size, n_types))
+    x_one_hot[np.arange(size), x] = 1
+    return x_one_hot

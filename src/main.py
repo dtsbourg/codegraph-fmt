@@ -31,9 +31,9 @@ astdir  = os.path.join(cfg.datadir, cfg.name, 'AST')
 
 import file_parser
 import project_crawler
-import ast_transformer
 import utils
-import ast_networkx
+import ast_transformer
+from ast_processor import ASTProcessor
 
 if cfg.preprocess:
     paths = project_crawler.crawl(path, verbose=cfg.verbose)
@@ -41,16 +41,17 @@ if cfg.preprocess:
     for idx,p in enumerate(paths):
         if cfg.verbose:
             print("[MAIN] Processing path", p)
+
         parsed_file = str(os.path.basename(p))
         save_file = 'AST-bin-dump-'+parsed_file
 
         parsed_ast = file_parser.parse(p, verbose=cfg.verbose)
-        ast_dump_file = os.path.join(dumpdir, save_file+'.ast')
+        ast_dump_file = os.path.join(astdir, save_file+'.ast')
         all_ast_dump.append(ast_dump_file)
         utils.save(ast=parsed_ast, filename=ast_dump_file, format='pickle')
 
         ast_dump = astor.dump_tree(parsed_ast)
-        ast_dump_file_txt = os.path.join(dumpdir, save_file+'.txt')
+        ast_dump_file_txt = os.path.join(astdir, save_file+'.txt')
         utils.save(ast=ast_dump, filename=ast_dump_file_txt, format='txt')
 
         print("\r[MAIN]  --- Saving parsed AST for file {0}/{1} ...".format(idx+1,len(paths)), end='\r')
@@ -61,4 +62,5 @@ if cfg.preprocess:
 else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
 
-ast_networkx.generate_json(all_ast_dump, dumpdir, cfg.verbose)
+ast_processor = ASTProcessor(ast_paths=all_ast_dump, save_dir=dumpdir, verbose=cfg.verbose)
+ast_processor.process()
