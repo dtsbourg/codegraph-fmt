@@ -29,7 +29,6 @@ dumpdir = os.path.join(cfg.datadir, cfg.name, 'graph')
 astdir  = os.path.join(cfg.datadir, cfg.name, 'AST')
 # END CFG
 
-import file_parser
 import project_crawler
 import utils
 import ast_transformer
@@ -45,7 +44,7 @@ if cfg.preprocess:
         parsed_file = str(os.path.basename(p))
         save_file = 'AST-bin-dump-'+parsed_file
 
-        parsed_ast = file_parser.parse(p, verbose=cfg.verbose)
+        parsed_ast = utils.parse_file(p, verbose=cfg.verbose)
         ast_dump_file = os.path.join(astdir, save_file+'.ast')
         all_ast_dump.append(ast_dump_file)
         utils.save(ast=parsed_ast, filename=ast_dump_file, format='pickle')

@@ -65,3 +65,9 @@ def one_hot_encoder(x, size):
     x_one_hot = np.zeros((size, n_types))
     x_one_hot[np.arange(size), x] = 1
     return x_one_hot
+
+    import os
+    import astor
+
+def parse_file(filename, verbose=False):
+    return astor.code_to_ast.parse_file(filename)
