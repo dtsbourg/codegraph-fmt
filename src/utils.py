@@ -54,7 +54,6 @@ def load_asts(path, verbose=False):
             if verbose:
                 print("\r[LOAD]  --- Loading parsed AST {0}/{1} ...".format(idx+1,len(asts)), end='\r')
         print()
-        print(all_asts)
         return all_asts
     except:
         print("[ERROR] Could not load pre-generated ASTs from", path, ".")

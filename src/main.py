@@ -32,7 +32,7 @@ astdir  = os.path.join(cfg.datadir, cfg.name, 'AST')
 import project_crawler
 import utils
 import ast_transformer
-from ast_processor import ASTProcessor
+import ast_processor
 
 if cfg.preprocess:
     paths = project_crawler.crawl(path, verbose=cfg.verbose)
@@ -61,5 +61,4 @@ if cfg.preprocess:
 else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
 
-ast_processor = ASTProcessor(ast_paths=all_ast_dump, save_dir=dumpdir, verbose=cfg.verbose)
-ast_processor.process()
+ast_processor.process(ast_paths=all_ast_dump, save_dir=dumpdir, verbose=cfg.verbose)
