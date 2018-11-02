@@ -19,16 +19,29 @@ import numpy as np
 from ast_transformer import ASTVisitor
 
 def process(ast_paths, save_dir, verbose):
+    '''
+    Run the processor from within the module to avoid persistance of ASTProcessor object.
+    '''
     processor = ASTProcessor(ast_paths=ast_paths, save_dir=save_dir, verbose=verbose)
     processor.process()
 
-class ASTProcessor():
-    def __init__(self, ast_paths, verbose, save_dir):
+class ASTProcessor(object):
+    '''
+    ASTProcessor class. This is the main abstraction with which passes on the AST are done.
+    It also provides an interface to dump the processed AST to networkx-compatible graphs.
+    '''
+    def __init__(self, ast_paths, save_dir, verbose):
+        '''
+        Args:
+            ast_paths : List of paths to pre-processed ASTs (.ast/pickle format by default)
+            save_dir  : Path to save output of AST processing.
+            verbose   : Verbose flag.
+        '''
         # Config
         self.ast_paths = ast_paths
         self.verbose = verbose
         self.save_dir = save_dir
-        # Global
+        # Global ## TODO: Document these variables @Thao
         self.top_nodes = []
         self.G = nx.Graph()
         self.id_map = {}
@@ -41,6 +54,15 @@ class ASTProcessor():
 
 
     def process(self):
+        '''Run the AST processing pipeline as follows:
+
+        For each AST files:
+            For each node
+                Build the node features
+            Build the equivalent networkx graph
+        Add a virtual root node
+        Output to .json
+        '''
         last_full_graph_node_count = 0
 
         for idx, ast_path in enumerate(self.ast_paths):
@@ -63,6 +85,11 @@ class ASTProcessor():
 
 
     def process_nodes(self, visitor, last_full_graph_node_count):
+        '''Process the visited nodes to build the graph
+        Args:
+            visitor : populated AST visitor (contains the stack of visited nodes)
+            last_full_graph_node_count : @Thao TODO document
+        '''
         for node in visitor.nodes_stack:
             current_node_count = self.node_count
 
@@ -77,12 +104,22 @@ class ASTProcessor():
             self.node_count = current_node_count + 1
 
     def process_ast(self, ast):
+        '''Process an entire AST.
+        Args:
+            ast : an ast object
+
+        Returns:
+            visitor : an ASTVisitor object which contains the stack of visited nodes
+        '''
         visitor = ASTVisitor(self.verbose)
-        visitor.visit(ast)
+        visitor.visit(ast) # <-- This could probably be optimized to loop just once with process_nodes
 
         return visitor
 
     def add_virtual_root_node(self):
+        '''
+        When dealing with multiple files we collate them by adding a virtual root node.
+        '''
         if self.add_root_node:
             self.G.add_node(self.node_count)
             self.features.append(-1)
@@ -92,6 +129,13 @@ class ASTProcessor():
             self.node_count += 1
 
     def generate_json(self):
+        '''
+        Dumps the processed AST to several files containing all the meta information
+
+        1. feats.npy   --> a numpy array cointaining all the node features.
+        2. id_map.json --> a map of node identifiers.
+        3. G.json      --> a networkx compatible graph.
+        '''
         features_one_hot = utils.one_hot_encoder(self.features, self.node_count)
 
         feature_path = os.path.join(self.save_dir, 'feats.npy')
