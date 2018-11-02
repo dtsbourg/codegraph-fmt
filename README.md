@@ -93,7 +93,7 @@ optional arguments:
                         Raw code folder identifier. (default: raw)
   -p PREGENPATH, --pregenpath PREGENPATH
                         Pre-generated AST folder identifier. (default: AST)
-```
+```
 
 (Optional) To profile the computation cost of the process, run the script with cProfile flag and save the output into a txt file that can later be parsed with pstats:
 ```
