@@ -46,11 +46,21 @@ class ASTVisitor(ast.NodeVisitor):
         self.verbose = verbose
         self.nodes_stack = []
         self.feature_list = []
+        self.prev_line_no = 0
+        self.prev_col_offset = 0
 
     def generic_visit(self, node):
         '''
         Is called upon visit to every node.
         '''
+        if not hasattr(node, 'lineno'):
+            node.lineno = self.prev_line_no
+        self.prev_line_no = node.lineno
+
+        if not hasattr(node, 'col_offset'):
+            node.col_offset = self.prev_col_offset
+        self.prev_col_offset = node.col_offset
+
         if not hasattr(node, 'visited'):
             self.nodes_stack.append(node)
             token_id = ast_utils.get_token_id(node)
