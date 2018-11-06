@@ -47,6 +47,8 @@ class ASTProcessor(object):
         self.id_map = {}
         self.ast_id_map = {}
         self.features = []
+        self.source_map = {}
+        self.file_map = {}
 
         self.node_count = 0
         self.ast_count = len(self.ast_paths)
@@ -72,16 +74,23 @@ class ASTProcessor(object):
             visitor = self.process_ast(ast)
 
             self.features.extend(visitor.feature_list)
-            self.top_nodes.append(self.node_count)
 
             self.process_nodes(visitor, last_full_graph_node_count)
+            self.process_top_nodes(self.node_count, ast_path)
 
             last_full_graph_node_count = self.node_count
 
         print()
 
+
         self.add_virtual_root_node()
         self.generate_json()
+
+    def process_top_nodes(self, node_id, path):
+        '''Map the top_level node_ids to files'''
+
+        self.top_nodes.append(node_id)
+        self.file_map[node_id] = path
 
 
     def process_nodes(self, visitor, last_full_graph_node_count):
@@ -92,10 +101,12 @@ class ASTProcessor(object):
         '''
         for node in visitor.nodes_stack:
             current_node_count = self.node_count
-
             self.G.add_node(current_node_count)
-            node.graph_id = current_node_count
-            self.id_map[self.node_count] = current_node_count
+            # TODO add train / test features
+            node.graph_id = current_node_count # This is never used???
+
+            self.id_map[current_node_count] = current_node_count
+            self.source_map[current_node_count] = (node.lineno, node.col_offset)
 
             for child in ast.iter_child_nodes(node):
                 child_index = visitor.nodes_stack.index(child)
@@ -140,12 +151,18 @@ class ASTProcessor(object):
 
         feature_path = os.path.join(self.save_dir, 'feats.npy')
         np.save(feature_path, features_one_hot)
+
+        print()
         print("[AST]  --- Saved features to", feature_path)
 
         with open(os.path.join(self.save_dir, 'id_map.json'), 'w') as fout:
             fout.write(json.dumps(self.id_map))
             print("[AST]  --- Saved identifier map to", fout.name)
 
-        with open(os.path.join(self.save_dir, 'G.json'), 'w') as fout:
-            fout.write(json.dumps(nx.json_graph.node_link_data(self.G)))
-            print("[AST]  --- Saved graph to", fout.name)
+        with open(os.path.join(self.save_dir, 'file_map.json'), 'w') as fout:
+            fout.write(json.dumps(self.file_map))
+            print("[AST]  --- Saved file map to", fout.name)
+
+        with open(os.path.join(self.save_dir, 'source_map.json'), 'w') as fout:
+            fout.write(json.dumps(self.source_map))
+            print("[AST]  --- Saved source map to", fout.name)
