@@ -144,10 +144,13 @@ class ASTProcessor(object):
         '''
         Dumps the processed AST to several files containing all the meta information
 
-        1. feats.npy   --> a numpy array cointaining all the node features.
-        2. id_map.json --> a map of node identifiers.
-        3. G.json      --> a networkx compatible graph.
+        1. feats.npy        --> a numpy array cointaining all the node features.
+        2. id_map.json      --> a map of node identifiers.
+        3. file_map.json    --> a map from root nodes to filenames.
+        4. source_map.json  --> a map of AST token identifiers to positions in the source code.
+        5. G.json           --> a networkx compatible graph representation of the AST.
         '''
+        # 1. Save features
         features_one_hot = utils.one_hot_encoder(self.features, self.node_count)
 
         feature_path = os.path.join(self.save_dir, 'feats.npy')
@@ -156,18 +159,12 @@ class ASTProcessor(object):
         print()
         print("[AST]  --- Saved features to", feature_path)
 
-        with open(os.path.join(self.save_dir, 'id_map.json'), 'w') as fout:
-            fout.write(json.dumps(self.id_map))
-            print("[AST]  --- Saved identifier map to", fout.name)
-
-        with open(os.path.join(self.save_dir, 'file_map.json'), 'w') as fout:
-            fout.write(json.dumps(self.file_map))
-            print("[AST]  --- Saved file map to", fout.name)
-
-        with open(os.path.join(self.save_dir, 'source_map.json'), 'w') as fout:
-            fout.write(json.dumps(self.source_map))
-            print("[AST]  --- Saved source map to", fout.name)
-
-        with open(os.path.join(self.save_dir, 'G.json'), 'w') as fout:
-            fout.write(json.dumps(nx.json_graph.node_link_data(self.G)))
-            print("[AST]  --- Saved Graph to", fout.name)
+        # 2. Save node identifiers
+        utils.save_json(self.id_map, save_dir=self.save_dir, filename='id_map.json')
+        # 3. Save File map
+        utils.save_json(self.file_map, save_dir=self.save_dir, filename='file_map.json')
+        # 4. Save Source map
+        utils.save_json(self.source_map, save_dir=self.save_dir, filename='source_map.json')
+        # 5. Save Graph
+        graph = nx.json_graph.node_link_data(self.G)
+        utils.save_json(graph, save_dir=self.save_dir, filename='G.json')

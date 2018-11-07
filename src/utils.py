@@ -14,6 +14,7 @@ import pickle
 import os
 import numpy as np
 import astor
+import json
 
 import project_crawler
 
@@ -68,3 +69,8 @@ def one_hot_encoder(x, size):
 
 def parse_file(filename, verbose=False):
     return astor.code_to_ast.parse_file(filename)
+
+def save_json(obj, save_dir, filename):
+    with open(os.path.join(save_dir, filename), 'w') as fout:
+        fout.write(json.dumps(obj))
+        print("[AST]  --- Saved", fout.name)
