@@ -75,8 +75,8 @@ class ASTProcessor(object):
 
             self.features.extend(visitor.feature_list)
 
-            self.process_nodes(visitor, last_full_graph_node_count)
-            self.process_top_nodes(self.node_count, ast_path)
+            top_node = self.process_nodes(visitor, last_full_graph_node_count)
+            self.process_top_nodes(top_node, ast_path)
 
             last_full_graph_node_count = self.node_count
 
@@ -99,20 +99,21 @@ class ASTProcessor(object):
             visitor : populated AST visitor (contains the stack of visited nodes)
             last_full_graph_node_count : @Thao TODO document
         '''
+        top_node = self.node_count
         for node in visitor.nodes_stack:
-            current_node_count = self.node_count
-            self.G.add_node(current_node_count)
+            self.G.add_node(self.node_count)
             # TODO add train / test features
-            node.graph_id = current_node_count # This is never used???
+            node.graph_id = self.node_count # This is never used???
 
-            self.id_map[current_node_count] = current_node_count
-            self.source_map[current_node_count] = (node.lineno, node.col_offset)
+            self.id_map[self.node_count] = self.node_count
+            self.source_map[self.node_count] = (top_node, node.lineno, node.col_offset)
 
             for child in ast.iter_child_nodes(node):
                 child_index = visitor.nodes_stack.index(child)
-                self.G.add_edge(current_node_count, last_full_graph_node_count + child_index) # child may be lower down the stack
+                self.G.add_edge(self.node_count, last_full_graph_node_count + child_index) # child may be lower down the stack
 
-            self.node_count = current_node_count + 1
+            self.node_count +=  1
+        return top_node
 
     def process_ast(self, ast):
         '''Process an entire AST.
@@ -166,3 +167,7 @@ class ASTProcessor(object):
         with open(os.path.join(self.save_dir, 'source_map.json'), 'w') as fout:
             fout.write(json.dumps(self.source_map))
             print("[AST]  --- Saved source map to", fout.name)
+
+        with open(os.path.join(self.save_dir, 'G.json'), 'w') as fout:
+            fout.write(json.dumps(nx.json_graph.node_link_data(self.G)))
+            print("[AST]  --- Saved Graph to", fout.name)
