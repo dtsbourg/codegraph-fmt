@@ -54,18 +54,22 @@ class ASTVisitor(ast.NodeVisitor):
         Is called upon visit to every node.
         '''
         if not hasattr(node, 'lineno'):
-            node.lineno = self.prev_line_no
+            node.lineno = -1
         self.prev_line_no = node.lineno
 
         if not hasattr(node, 'col_offset'):
-            node.col_offset = self.prev_col_offset
+            node.col_offset = -1
         self.prev_col_offset = node.col_offset
 
         if not hasattr(node, 'visited'):
             self.nodes_stack.append(node)
+
             token_id = ast_utils.get_token_id(node)
             if token_id == -1:
                 print("[WARNING] --- Found unkown token", node)
+
             self.feature_list.append(token_id)
+
             node.visited = True
+
         ast.NodeVisitor.generic_visit(self, node)
