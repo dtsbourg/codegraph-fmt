@@ -144,6 +144,7 @@ class ASTProcessor(object):
         '''
         if self.add_root_node:
             self.G.add_node(self.node_count, attr_dict={'train': True, 'test': False, 'val': False, 'feature': -1})
+            self.id_map[self.node_count] = self.node_count
             self.features.append(-1)
 
             for top_node in self.top_nodes:
