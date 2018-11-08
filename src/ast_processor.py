@@ -82,8 +82,8 @@ class ASTProcessor(object):
 
             self.features.extend(visitor.feature_list)
 
-            self.process_nodes(visitor, last_full_graph_node_count)
-            self.process_top_nodes(self.node_count, ast_path)
+            top_node = self.process_nodes(visitor, last_full_graph_node_count)
+            self.process_top_nodes(top_node, ast_path)
 
             last_full_graph_node_count = self.node_count
 
@@ -106,23 +106,24 @@ class ASTProcessor(object):
             visitor : populated AST visitor (contains the stack of visited nodes)
             last_full_graph_node_count : node id of the last full AST (corr. to one file) added to the graph
         '''
+        top_node = self.node_count
         for i, node in enumerate(visitor.nodes_stack):
-            current_node_count = self.node_count
             if np.random.rand(1)[0] < self.test_ratio:
                 train = False
             else:
                 train = True
-            self.G.add_node(current_node_count, attr_dict={'train': train, 'test': not train, 'val': False, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
-            node.graph_id = current_node_count # This is never used???
+            self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': False, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
+            node.graph_id = self.node_count # This is never used???
 
-            self.id_map[current_node_count] = current_node_count
-            self.source_map[current_node_count] = (node.lineno, node.col_offset)
+            self.id_map[self.node_count] = self.node_count
+            self.source_map[self.node_count] = (top_node, node.lineno, node.col_offset)
 
             for child in ast.iter_child_nodes(node):
                 child_index = visitor.nodes_stack.index(child)
-                self.G.add_edge(current_node_count, last_full_graph_node_count + child_index) # child may be lower down the stack
+                self.G.add_edge(self.node_count, last_full_graph_node_count + child_index) # child may be lower down the stack
 
-            self.node_count = current_node_count + 1
+            self.node_count +=  1
+        return top_node
 
     def process_ast(self, ast):
         '''Process an entire AST.
@@ -153,10 +154,13 @@ class ASTProcessor(object):
         '''
         Dumps the processed AST to several files containing all the meta information
 
-        1. feats.npy   --> a numpy array cointaining all the node features.
-        2. id_map.json --> a map of node identifiers.
-        3. G.json      --> a networkx compatible graph.
+        1. feats.npy        --> a numpy array cointaining all the node features.
+        2. id_map.json      --> a map of node identifiers.
+        3. file_map.json    --> a map from root nodes to filenames.
+        4. source_map.json  --> a map of AST token identifiers to positions in the source code.
+        5. G.json           --> a networkx compatible graph representation of the AST.
         '''
+        # 1. Save features
         features_one_hot = utils.one_hot_encoder(self.features, self.node_count)
 
         feature_path = os.path.join(self.save_dir, 'feats.npy')
@@ -165,17 +169,12 @@ class ASTProcessor(object):
         print()
         print("[AST]  --- Saved features to", feature_path)
 
-        with open(os.path.join(self.save_dir, 'id_map.json'), 'w') as fout:
-            fout.write(json.dumps(self.id_map))
-            print("[AST]  --- Saved identifier map to", fout.name)
-
-        with open(os.path.join(self.save_dir, 'file_map.json'), 'w') as fout:
-            fout.write(json.dumps(self.file_map))
-            print("[AST]  --- Saved file map to", fout.name)
-
-        with open(os.path.join(self.save_dir, 'source_map.json'), 'w') as fout:
-            fout.write(json.dumps(self.source_map))
-            print("[AST]  --- Saved source map to", fout.name)
-        with open(os.path.join(self.save_dir, 'G.json'), 'w') as fout:
-            fout.write(json.dumps(nx.json_graph.node_link_data(self.G)))
-            print("[AST]  --- Saved networkx graph to", fout.name)
+        # 2. Save node identifiers
+        utils.save_json(self.id_map, save_dir=self.save_dir, filename='id_map.json')
+        # 3. Save File map
+        utils.save_json(self.file_map, save_dir=self.save_dir, filename='file_map.json')
+        # 4. Save Source map
+        utils.save_json(self.source_map, save_dir=self.save_dir, filename='source_map.json')
+        # 5. Save Graph
+        graph = nx.json_graph.node_link_data(self.G)
+        utils.save_json(graph, save_dir=self.save_dir, filename='G.json')

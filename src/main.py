@@ -11,12 +11,11 @@ from collections import namedtuple
 import astor
 import argparse
 
-
 # CFG
 parser = argparse.ArgumentParser(description="Configure the AST generation and parsing script.",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument("--verbose", action="store_true", dest="verbose")
+parser.add_argument("--verbose",    action="store_true", dest="verbose")
 parser.add_argument("--preprocess", action="store_true", dest="preprocess", help="If flag is passed, the ASTs will be re-generated. Otherwise, the script will load pre-generated AST")
 parser.add_argument("-d", "--datadir",    type=str, default="../data",      dest="datadir",    help="Path to the top level data directory.")
 parser.add_argument("-n", "--name",       type=str, default="code-sample",  dest="name",       help="Identifier for the mined directory.")
@@ -38,7 +37,7 @@ import ast_processor
 
 if cfg.preprocess:
     paths = project_crawler.crawl(path, verbose=cfg.verbose)
-    all_ast_dump = []
+    all_ast_dump = []; parse_map = {}
     for idx,p in enumerate(paths):
         if cfg.verbose:
             print("[MAIN] Processing path", p)
@@ -51,6 +50,8 @@ if cfg.preprocess:
         all_ast_dump.append(ast_dump_file)
         utils.save(ast=parsed_ast, filename=ast_dump_file, format='pickle')
 
+        parse_map[ast_dump_file] = p
+
         ast_dump = astor.dump_tree(parsed_ast)
         ast_dump_file_txt = os.path.join(astdir, save_file+'.txt')
         utils.save(ast=ast_dump, filename=ast_dump_file_txt, format='txt')
@@ -59,6 +60,8 @@ if cfg.preprocess:
     print()
     print("[MAIN]  --- Saved parsed AST for {0} files in {1}.".format(len(paths), dumpdir))
     print()
+
+    utils.save_json(parse_map, save_dir=dumpdir, filename='parse_map.json')
 
 else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
