@@ -27,6 +27,8 @@ cfg = parser.parse_args()
 path    = os.path.join(cfg.datadir, cfg.name, cfg.codefolder)
 dumpdir = os.path.join(cfg.datadir, cfg.name, 'graph')
 astdir  = os.path.join(cfg.datadir, cfg.name, 'AST')
+if not os.path.exists(dumpdir):
+    os.makedirs(dumpdir)
 # END CFG
 
 import project_crawler
@@ -61,4 +63,4 @@ if cfg.preprocess:
 else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
 
-ast_processor.process(ast_paths=all_ast_dump, save_dir=dumpdir, verbose=cfg.verbose)
+ast_processor.process(ast_paths=all_ast_dump, save_dir=dumpdir, verbose=cfg.verbose, test_ratio=0.2)

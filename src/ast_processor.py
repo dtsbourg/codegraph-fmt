@@ -18,11 +18,11 @@ import numpy as np
 
 from ast_transformer import ASTVisitor
 
-def process(ast_paths, save_dir, verbose):
+def process(ast_paths, save_dir, verbose, test_ratio):
     '''
     Run the processor from within the module to avoid persistance of ASTProcessor object.
     '''
-    processor = ASTProcessor(ast_paths=ast_paths, save_dir=save_dir, verbose=verbose)
+    processor = ASTProcessor(ast_paths=ast_paths, save_dir=save_dir, verbose=verbose, test_ratio=test_ratio)
     processor.process()
 
 class ASTProcessor(object):
@@ -30,22 +30,29 @@ class ASTProcessor(object):
     ASTProcessor class. This is the main abstraction with which passes on the AST are done.
     It also provides an interface to dump the processed AST to networkx-compatible graphs.
     '''
-    def __init__(self, ast_paths, save_dir, verbose):
+    def __init__(self, ast_paths, save_dir, verbose, test_ratio):
         '''
         Args:
             ast_paths : List of paths to pre-processed ASTs (.ast/pickle format by default)
-            save_dir  : Path to save output of AST processing.
-            verbose   : Verbose flag.
+            save_dir  : Path to save output of AST processing
+            test_ratio: Proportion of nodes reserved for testing in the entire graph
+            verbose   : Verbose flag
+            top_nodes : list of the root nodes corresponding to each of the ASTs
+            G         : the output networkx undirected graph
+            id_map    : dict used to output id_map.json
+            features  : list of features obtained from each node in order during traversal
+            source_map: dict mapping graph node id to tuple of (line number, col offset) for inverse lookup
+            file_map  : dict mapping root node ids to corresponding files
         '''
         # Config
         self.ast_paths = ast_paths
         self.verbose = verbose
+        self.test_ratio = test_ratio
         self.save_dir = save_dir
-        # Global ## TODO: Document these variables @Thao
+        # Global
         self.top_nodes = []
         self.G = nx.Graph()
         self.id_map = {}
-        self.ast_id_map = {}
         self.features = []
         self.source_map = {}
         self.file_map = {}
@@ -97,12 +104,15 @@ class ASTProcessor(object):
         '''Process the visited nodes to build the graph
         Args:
             visitor : populated AST visitor (contains the stack of visited nodes)
-            last_full_graph_node_count : @Thao TODO document
+            last_full_graph_node_count : node id of the last full AST (corr. to one file) added to the graph
         '''
-        for node in visitor.nodes_stack:
+        for i, node in enumerate(visitor.nodes_stack):
             current_node_count = self.node_count
-            self.G.add_node(current_node_count)
-            # TODO add train / test features
+            if np.random.rand(1)[0] < self.test_ratio:
+                train = False
+            else:
+                train = True
+            self.G.add_node(current_node_count, attr_dict={'train': train, 'test': not train, 'val': False, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
             node.graph_id = current_node_count # This is never used???
 
             self.id_map[current_node_count] = current_node_count
@@ -132,7 +142,7 @@ class ASTProcessor(object):
         When dealing with multiple files we collate them by adding a virtual root node.
         '''
         if self.add_root_node:
-            self.G.add_node(self.node_count)
+            self.G.add_node(self.node_count, attr_dict={'train': True, 'test': False, 'val': False, 'feature': -1})
             self.features.append(-1)
 
             for top_node in self.top_nodes:
@@ -166,3 +176,6 @@ class ASTProcessor(object):
         with open(os.path.join(self.save_dir, 'source_map.json'), 'w') as fout:
             fout.write(json.dumps(self.source_map))
             print("[AST]  --- Saved source map to", fout.name)
+        with open(os.path.join(self.save_dir, 'G.json'), 'w') as fout:
+            fout.write(json.dumps(nx.json_graph.node_link_data(self.G)))
+            print("[AST]  --- Saved networkx graph to", fout.name)
