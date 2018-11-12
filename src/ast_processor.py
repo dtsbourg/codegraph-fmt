@@ -18,11 +18,11 @@ import numpy as np
 
 from ast_transformer import ASTVisitor
 
-def process(ast_paths, save_dir, verbose, test_ratio):
+def process(ast_paths, save_dir, verbose, test_ratio, prefix):
     '''
     Run the processor from within the module to avoid persistance of ASTProcessor object.
     '''
-    processor = ASTProcessor(ast_paths=ast_paths, save_dir=save_dir, verbose=verbose, test_ratio=test_ratio)
+    processor = ASTProcessor(ast_paths=ast_paths, save_dir=save_dir, verbose=verbose, test_ratio=test_ratio, prefix=prefix)
     processor.process()
 
 class ASTProcessor(object):
@@ -30,32 +30,28 @@ class ASTProcessor(object):
     ASTProcessor class. This is the main abstraction with which passes on the AST are done.
     It also provides an interface to dump the processed AST to networkx-compatible graphs.
     '''
-    def __init__(self, ast_paths, save_dir, verbose, test_ratio):
+    def __init__(self, ast_paths, save_dir, verbose, test_ratio, prefix):
         '''
         Args:
             ast_paths : List of paths to pre-processed ASTs (.ast/pickle format by default)
             save_dir  : Path to save output of AST processing
             test_ratio: Proportion of nodes reserved for testing in the entire graph
             verbose   : Verbose flag
-            top_nodes : list of the root nodes corresponding to each of the ASTs
-            G         : the output networkx undirected graph
-            id_map    : dict used to output id_map.json
-            features  : list of features obtained from each node in order during traversal
-            source_map: dict mapping graph node id to tuple of (line number, col offset) for inverse lookup
-            file_map  : dict mapping root node ids to corresponding files
+            prefix    : Prefix appended to file when saved
         '''
         # Config
         self.ast_paths = ast_paths
         self.verbose = verbose
         self.test_ratio = test_ratio
         self.save_dir = save_dir
+        self.prefix = prefix
         # Global
-        self.top_nodes = []
+        self.top_nodes = []     # List of the root nodes corresponding to each of the ASTs
         self.G = nx.Graph()
-        self.id_map = {}
-        self.features = []
-        self.source_map = {}
-        self.file_map = {}
+        self.id_map = {}        # Maps node ids to their index in the feature array
+        self.features = []      # Feature array
+        self.source_map = {}    # Graph node id to tuple of (top_node, line number, col offset) for inverse lookup
+        self.file_map = {}      # Mapping root node ids to corresponding files
 
         self.node_count = 0
         self.ast_count = len(self.ast_paths)
@@ -89,7 +85,6 @@ class ASTProcessor(object):
 
         print()
 
-
         self.add_virtual_root_node()
         self.generate_json()
 
@@ -113,6 +108,7 @@ class ASTProcessor(object):
             else:
                 train = True
             self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': False, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
+
             node.graph_id = self.node_count # This is never used???
 
             self.id_map[self.node_count] = self.node_count
@@ -164,18 +160,18 @@ class ASTProcessor(object):
         # 1. Save features
         features_one_hot = utils.one_hot_encoder(self.features, self.node_count)
 
-        feature_path = os.path.join(self.save_dir, 'feats.npy')
+        feature_path = os.path.join(self.save_dir, self.prefix+'-feats.npy')
         np.save(feature_path, features_one_hot)
 
         print()
         print("[AST]  --- Saved features to", feature_path)
 
         # 2. Save node identifiers
-        utils.save_json(self.id_map, save_dir=self.save_dir, filename='id_map.json')
+        utils.save_json(self.id_map, save_dir=self.save_dir, filename=self.prefix+'-id_map.json')
         # 3. Save File map
-        utils.save_json(self.file_map, save_dir=self.save_dir, filename='file_map.json')
+        utils.save_json(self.file_map, save_dir=self.save_dir, filename=self.prefix+'-file_map.json')
         # 4. Save Source map
-        utils.save_json(self.source_map, save_dir=self.save_dir, filename='source_map.json')
+        utils.save_json(self.source_map, save_dir=self.save_dir, filename=self.prefix+'-source_map.json')
         # 5. Save Graph
         graph = nx.json_graph.node_link_data(self.G)
-        utils.save_json(graph, save_dir=self.save_dir, filename='G.json')
+        utils.save_json(graph, save_dir=self.save_dir, filename=self.prefix+'-G.json')

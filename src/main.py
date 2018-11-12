@@ -61,9 +61,9 @@ if cfg.preprocess:
     print("[MAIN]  --- Saved parsed AST for {0} files in {1}.".format(len(paths), dumpdir))
     print()
 
-    utils.save_json(parse_map, save_dir=dumpdir, filename='parse_map.json')
+    utils.save_json(parse_map, save_dir=dumpdir, filename=cfg.codefolder+'-parse_map.json')
 
 else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
 
-ast_processor.process(ast_paths=all_ast_dump, save_dir=dumpdir, verbose=cfg.verbose, test_ratio=0.2)
+ast_processor.process(ast_paths=all_ast_dump, save_dir=dumpdir, verbose=cfg.verbose, test_ratio=0.2, prefix=cfg.codefolder)
