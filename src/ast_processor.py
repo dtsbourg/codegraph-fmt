@@ -45,6 +45,7 @@ class ASTProcessor(object):
         self.test_ratio = test_ratio
         self.save_dir = save_dir
         self.prefix = prefix
+        self.one_hot_features = False
         # Global
         self.top_nodes = []     # List of the root nodes corresponding to each of the ASTs
         self.G = nx.Graph()
@@ -158,10 +159,11 @@ class ASTProcessor(object):
         5. G.json           --> a networkx compatible graph representation of the AST.
         '''
         # 1. Save features
-        features_one_hot = utils.one_hot_encoder(self.features, self.node_count)
+        if self.one_hot_features:
+            self.features = utils.one_hot_encoder(self.features, self.node_count)
 
         feature_path = os.path.join(self.save_dir, self.prefix+'-feats.npy')
-        np.save(feature_path, features_one_hot)
+        np.save(feature_path, self.features)
 
         print()
         print("[AST]  --- Saved features to", feature_path)
