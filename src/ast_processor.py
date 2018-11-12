@@ -160,7 +160,9 @@ class ASTProcessor(object):
         '''
         # 1. Save features
         if self.one_hot_features:
-            self.features = utils.one_hot_encoder(self.features, self.node_count)
+            features = utils.one_hot_encoder(self.features, self.node_count)
+        else:
+            features = np.array(self.features).reshape(-1, 1)
 
         feature_path = os.path.join(self.save_dir, self.prefix+'-feats.npy')
         np.save(feature_path, self.features)
