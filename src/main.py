@@ -58,6 +58,9 @@ if cfg.preprocess:
 
         print("\r[MAIN]  --- Saving parsed AST for file {0}/{1} ...".format(idx+1,len(paths)), end='\r')
     print()
+    if len(paths) == 0:
+        print("[ERROR] --- Found no files to process in {}".format(path))
+        quit() 
     print("[MAIN]  --- Saved parsed AST for {0} files in {1}.".format(len(paths), dumpdir))
     print()
 
