@@ -45,7 +45,7 @@ class ASTProcessor(object):
         self.test_ratio = test_ratio
         self.save_dir = save_dir
         self.prefix = prefix
-        self.one_hot_features = False
+        self.one_hot_features = True 
         # Global
         self.top_nodes = []     # List of the root nodes corresponding to each of the ASTs
         self.G = nx.Graph()
@@ -165,7 +165,7 @@ class ASTProcessor(object):
             features = np.array(self.features).reshape(-1, 1)
 
         feature_path = os.path.join(self.save_dir, self.prefix+'-feats.npy')
-        np.save(feature_path, self.features)
+        np.save(feature_path, features)
 
         print()
         print("[AST]  --- Saved features to", feature_path)
