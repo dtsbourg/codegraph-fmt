@@ -70,11 +70,36 @@ action for now:
 
 ### 3. Manipulating the generated ASTs
 
-> TODO: This will be done in the `ast_transformer.py` module.
->       `astor` should provide the required methods for traversing the AST.
->       This module should just do some bookkeeping on top of this.
->       The output should be GraphSAGE compatible `.json` representations
->       of the source code graph.
+Run main.py that first crawls all the python files in the raw code directory, constructs an AST for each file and pass the list of ASTs to generate_json() function in ast_networkx.py, which in turn traverses each AST in DFS manner, extracts features (AST node type), converts the AST into a networkx graph and finally merges all the graphs together into one.
+
+```
+usage: main.py [-h] [--verbose] [--preprocess] [-d DATADIR] [-n NAME]
+               [-c CODEFOLDER] [-p PREGENPATH]
+
+Configure the AST generation and parsing script.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --verbose
+  --preprocess          If flag is passed, the ASTs will be re-generated.
+                        Otherwise, the script will load pre-generated AST
+                        (default: False)
+  -d DATADIR, --datadir DATADIR
+                        Path to the top level data directory. (default:
+                        ../data)
+  -n NAME, --name NAME  Identifier for the mined directory. (default: code-
+                        sample)
+  -c CODEFOLDER, --codefolder CODEFOLDER
+                        Raw code folder identifier. (default: raw)
+  -p PREGENPATH, --pregenpath PREGENPATH
+                        Pre-generated AST folder identifier. (default: AST)
+```
+
+(Optional) To profile the computation cost of the process, run the script with cProfile flag and save the output into a txt file that can later be parsed with pstats:
+```
+SAGE-fmt/src> python -m cProfile -o [output txt file] main.py [arguments as mentioned above]
+SAGE-fmt/src> python parse_profiling_output.py > [readable output file]
+```
 
 #### The GraphSAGE Format
 
