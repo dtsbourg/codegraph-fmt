@@ -18,11 +18,11 @@ import numpy as np
 
 from ast_transformer import ASTVisitor
 
-def process(ast_paths, save_dir, verbose, test_ratio, prefix):
+def process(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix):
     '''
     Run the processor from within the module to avoid persistance of ASTProcessor object.
     '''
-    processor = ASTProcessor(ast_paths=ast_paths, save_dir=save_dir, verbose=verbose, test_ratio=test_ratio, prefix=prefix)
+    processor = ASTProcessor(ast_paths=ast_paths, save_dir=save_dir, verbose=verbose, test_ratio=test_ratio, val_ratio=val_ratio, prefix=prefix)
     processor.process()
 
 class ASTProcessor(object):
@@ -30,32 +30,34 @@ class ASTProcessor(object):
     ASTProcessor class. This is the main abstraction with which passes on the AST are done.
     It also provides an interface to dump the processed AST to networkx-compatible graphs.
     '''
-    def __init__(self, ast_paths, save_dir, verbose, test_ratio, prefix):
+    def __init__(self, ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix):
         '''
         Args:
             ast_paths : List of paths to pre-processed ASTs (.ast/pickle format by default)
             save_dir  : Path to save output of AST processing
             test_ratio: Proportion of nodes reserved for testing in the entire graph
+            val_ratio: Proportion of nodes reserved for validation in the entire graph
             verbose   : Verbose flag
             prefix    : Prefix appended to file when saved
         '''
         # Config
-        self.ast_paths = ast_paths
-        self.verbose = verbose
+        self.ast_paths  = ast_paths
+        self.verbose    = verbose
         self.test_ratio = test_ratio
-        self.save_dir = save_dir
-        self.prefix = prefix
-        self.one_hot_features = True 
+        self.val_ratio  = val_ratio
+        self.save_dir   = save_dir
+        self.prefix     = prefix
+        self.one_hot_features = True
         # Global
-        self.top_nodes = []     # List of the root nodes corresponding to each of the ASTs
-        self.G = nx.Graph()
-        self.id_map = {}        # Maps node ids to their index in the feature array
-        self.features = []      # Feature array
-        self.source_map = {}    # Graph node id to tuple of (top_node, line number, col offset) for inverse lookup
-        self.file_map = {}      # Mapping root node ids to corresponding files
+        self.top_nodes  = []            # List of the root nodes corresponding to each of the ASTs
+        self.G          = nx.Graph()
+        self.id_map     = {}            # Maps node ids to their index in the feature array
+        self.features   = []            # Feature array
+        self.source_map = {}            # Graph node id to tuple of (top_node, line number, col offset) for inverse lookup
+        self.file_map   = {}            # Mapping root node ids to corresponding files
 
         self.node_count = 0
-        self.ast_count = len(self.ast_paths)
+        self.ast_count  = len(self.ast_paths)
         self.add_root_node = self.ast_count > 1
 
 
@@ -104,11 +106,13 @@ class ASTProcessor(object):
         '''
         top_node = self.node_count
         for i, node in enumerate(visitor.nodes_stack):
-            if np.random.rand(1)[0] < self.test_ratio:
+            val, train = False, True
+            rand = np.random.rand(1)[0]
+            if rand < self.test_ratio:
                 train = False
-            else:
-                train = True
-            self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': False, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
+            elif rand < self.val_ratio:
+                val = True
+            self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': val, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
 
             node.graph_id = self.node_count # This is never used???
 
@@ -140,9 +144,9 @@ class ASTProcessor(object):
         When dealing with multiple files we collate them by adding a virtual root node.
         '''
         if self.add_root_node:
-            self.G.add_node(self.node_count, attr_dict={'train': True, 'test': False, 'val': False, 'feature': -1})
+            self.G.add_node(self.node_count, attr_dict={'train': True, 'test': False, 'val': False, 'feature': 0})
             self.id_map[self.node_count] = self.node_count
-            self.features.append(-1)
+            self.features.append(0)
 
             for top_node in self.top_nodes:
                 self.G.add_edge(self.node_count, top_node)

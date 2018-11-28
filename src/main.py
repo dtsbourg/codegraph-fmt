@@ -60,7 +60,7 @@ if cfg.preprocess:
     print()
     if len(paths) == 0:
         print("[ERROR] --- Found no files to process in {}".format(path))
-        quit() 
+        quit()
     print("[MAIN]  --- Saved parsed AST for {0} files in {1}.".format(len(paths), dumpdir))
     print()
 
@@ -69,4 +69,9 @@ if cfg.preprocess:
 else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
 
-ast_processor.process(ast_paths=all_ast_dump, save_dir=dumpdir, verbose=cfg.verbose, test_ratio=0.2, prefix=cfg.codefolder)
+ast_processor.process(ast_paths=all_ast_dump,
+                      save_dir=dumpdir,
+                      verbose=cfg.verbose,
+                      test_ratio=0.2,
+                      val_ratio=0.2,
+                      prefix=cfg.codefolder)

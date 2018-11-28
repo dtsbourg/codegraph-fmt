@@ -53,6 +53,10 @@ class ASTVisitor(ast.NodeVisitor):
         '''
         Is called upon visit to every node.
         '''
+        if isinstance(node, ast.Name):
+            if type(node.ctx) is not ast.Load:
+                node.varname = node.id
+
         if not hasattr(node, 'lineno'):
             node.lineno = -1
         self.prev_line_no = node.lineno
