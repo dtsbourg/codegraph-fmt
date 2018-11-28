@@ -110,7 +110,7 @@ class ASTProcessor(object):
             rand = np.random.rand(1)[0]
             if rand < self.test_ratio:
                 train = False
-            elif rand < self.val_ratio:
+            elif rand > 1-self.val_ratio:
                 val = True
             self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': val, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
 
