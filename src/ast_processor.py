@@ -81,7 +81,7 @@ class ASTProcessor(object):
             visitor = self.process_ast(ast)
 
             self.features.extend(visitor.feature_list)
-            self.classes.extend(visitor.class_list)
+            self.classes.extend(visitor.classes_list)
 
             top_node = self.process_nodes(visitor, last_full_graph_node_count)
             self.process_top_nodes(top_node, ast_path)
@@ -187,5 +187,5 @@ class ASTProcessor(object):
         graph = nx.json_graph.node_link_data(self.G)
         utils.save_json(graph, save_dir=self.save_dir, filename=self.prefix+'-G.json')
         # 6. Save class
-        class_map = {i: list(map(int,c)) for i,c in enumerate(self.classes)}
+        class_map = {i: c for i,c in enumerate(self.classes)}
         utils.save_json(class_map, save_dir=self.save_dir, filename=self.prefix+'-class_map.json')
