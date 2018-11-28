@@ -46,7 +46,7 @@ class ASTVisitor(ast.NodeVisitor):
         self.verbose         = verbose
         self.nodes_stack     = []
         self.feature_list    = []
-        self.class_list      = []
+        self.classes_list      = []
         self.prev_line_no    = 0
         self.prev_col_offset = 0
 
@@ -74,7 +74,7 @@ class ASTVisitor(ast.NodeVisitor):
                 print("[WARNING] --- Found unkown token", node)
 
             self.feature_list.append(token_id)
-            self.class_list.append(ast_utils.get_token_class_id(node))
+            self.classes_list.append(ast_utils.get_token_class_id(node))
             node.visited = True
 
         ast.NodeVisitor.generic_visit(self, node)

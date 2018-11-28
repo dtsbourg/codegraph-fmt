@@ -53,7 +53,7 @@ class ASTProcessor(object):
         self.G          = nx.Graph()
         self.id_map     = {}            # Maps node ids to their index in the feature array
         self.features   = []            # Feature array
-        self.class      = []
+        self.classes      = []
         self.source_map = {}            # Graph node id to tuple of (top_node, line number, col offset) for inverse lookup
         self.file_map   = {}            # Mapping root node ids to corresponding files
 
@@ -81,7 +81,7 @@ class ASTProcessor(object):
             visitor = self.process_ast(ast)
 
             self.features.extend(visitor.feature_list)
-            self.class.extend(visitor.class_list)
+            self.classes.extend(visitor.class_list)
 
             top_node = self.process_nodes(visitor, last_full_graph_node_count)
             self.process_top_nodes(top_node, ast_path)
@@ -149,7 +149,7 @@ class ASTProcessor(object):
             self.G.add_node(self.node_count, attr_dict={'train': True, 'test': False, 'val': False, 'feature': 0})
             self.id_map[self.node_count] = self.node_count
             self.features.append(0)
-            self.class.append(13)
+            self.classes.append(13)
 
             for top_node in self.top_nodes:
                 self.G.add_edge(self.node_count, top_node)
@@ -187,5 +187,5 @@ class ASTProcessor(object):
         graph = nx.json_graph.node_link_data(self.G)
         utils.save_json(graph, save_dir=self.save_dir, filename=self.prefix+'-G.json')
         # 6. Save class
-        class_map = {i: list(map(int,c)) for i,c in enumerate(self.class)}
+        class_map = {i: list(map(int,c)) for i,c in enumerate(self.classes)}
         utils.save_json(class_map, save_dir=self.save_dir, filename=self.prefix+'-class_map.json')
