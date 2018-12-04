@@ -134,7 +134,6 @@ class ASTProcessor(object):
                 self.G.add_edge(self.node_count, last_full_graph_node_count + child_index) # child may be lower down the stack
 
             self.node_count +=  1
-        print(self.var_map)
         return top_node
 
     def process_ast(self, ast):
