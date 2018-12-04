@@ -46,7 +46,7 @@ class ASTVisitor(ast.NodeVisitor):
         self.verbose         = verbose
         self.nodes_stack     = []
         self.feature_list    = []
-        self.classes_list      = []
+        self.classes_list    = []
         self.prev_line_no    = 0
         self.prev_col_offset = 0
 

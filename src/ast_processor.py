@@ -53,9 +53,11 @@ class ASTProcessor(object):
         self.G          = nx.Graph()
         self.id_map     = {}            # Maps node ids to their index in the feature array
         self.features   = []            # Feature array
-        self.classes      = []
+        self.classes    = []
         self.source_map = {}            # Graph node id to tuple of (top_node, line number, col offset) for inverse lookup
         self.file_map   = {}            # Mapping root node ids to corresponding files
+        self.var_map    = {}            # Mapping node ids to variable names, if applicable
+        self.inv_var_map = {}
 
         self.node_count = 0
         self.ast_count  = len(self.ast_paths)
@@ -108,24 +110,31 @@ class ASTProcessor(object):
         '''
         top_node = self.node_count
         for i, node in enumerate(visitor.nodes_stack):
+            # Split train / test / val
             val, train = False, True
             rand = np.random.rand(1)[0]
             if rand < self.test_ratio:
                 train = False
             elif rand > 1-self.val_ratio:
                 val = True
-            self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': val, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
 
+            # Add nodes to networkx graph
+            self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': val, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
             node.graph_id = self.node_count # This is never used???
 
+            # Populate feature maps
             self.id_map[self.node_count] = self.node_count
             self.source_map[self.node_count] = (top_node, node.lineno, node.col_offset)
+
+            if hasattr(node, 'varname'):
+                self.var_map[self.node_count] = node.varname
 
             for child in ast.iter_child_nodes(node):
                 child_index = visitor.nodes_stack.index(child)
                 self.G.add_edge(self.node_count, last_full_graph_node_count + child_index) # child may be lower down the stack
 
             self.node_count +=  1
+        print(self.var_map)
         return top_node
 
     def process_ast(self, ast):
@@ -164,6 +173,8 @@ class ASTProcessor(object):
         3. file_map.json    --> a map from root nodes to filenames.
         4. source_map.json  --> a map of AST token identifiers to positions in the source code.
         5. G.json           --> a networkx compatible graph representation of the AST.
+        6. class_map.json   --> a map of node_id to class.
+        6. var_map.json   --> a map of node_id to variable names (when applicable).
         '''
         # 1. Save features
         if self.one_hot_features:
@@ -189,3 +200,5 @@ class ASTProcessor(object):
         # 6. Save class
         class_map = {i: c for i,c in enumerate(self.classes)}
         utils.save_json(class_map, save_dir=self.save_dir, filename=self.prefix+'-class_map.json')
+        # 7. Save variable names
+        utils.save_json(self.var_map, save_dir=self.save_dir, filename=self.prefix+'-var_map.json')

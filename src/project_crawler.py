@@ -15,7 +15,9 @@ import os
 blacklist = [
     '__init__.py',
     'setup.py',
-    'autogen.py'
+    'autogen.py',
+    'conf.py',
+    'config.py'
 ]
 
 def crawl(path, verbose=False, filetype='.py'):

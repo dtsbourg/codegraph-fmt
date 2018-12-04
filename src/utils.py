@@ -74,3 +74,12 @@ def save_json(obj, save_dir, filename):
     with open(os.path.join(save_dir, filename), 'w') as fout:
         fout.write(json.dumps(obj))
         print("[AST]  --- Saved", fout.name)
+
+def invert_var_map(var_map):
+    inv_var_map = {}
+    for node_id, var_name in var_map.items():
+        if inv_var_map.get(var_name, None) is None:
+            inv_var_map[var_name] = [node_id]
+        else:
+            inv_var_map[var_name].append(node_id)
+    return inv_var_map
