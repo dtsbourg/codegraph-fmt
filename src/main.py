@@ -23,8 +23,6 @@ astdir   = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], 'AST');  
 traindir = os.path.join(dumpdir, 'train');              create_dir(traindir)
 testdir  = os.path.join(dumpdir, 'test');               create_dir(testdir)
 valdir   = os.path.join(dumpdir, 'val');                create_dir(valdir)
-
-
 # END CFG
 
 import project_crawler
@@ -69,13 +67,13 @@ else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
 
 if cfg['experiment']['graph_type'] == 'project_graph':
-    ast_processor.process(ast_paths=train_files,
+    ast_processor.process(ast_paths=[parse_map[f] for f in train_files],
                           save_dir=os.path.join(dumpdir, 'train'),
                           verbose=cfg['run']['verbose'],
                           test_ratio=1.0-cfg['experiment']['train_ratio'],
                           val_ratio=cfg['experiment']['val_ratio'],
                           prefix=cfg['paths']['folder'])
-    ast_processor.process(ast_paths=test_files,
+    ast_processor.process(ast_paths=[parse_map[f] for f in test_files],
                           save_dir=os.path.join(dumpdir, 'test'),
                           verbose=cfg['run']['verbose'],
                           test_ratio=1.0-cfg['experiment']['train_ratio'],
