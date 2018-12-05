@@ -17,9 +17,9 @@ from utils import create_dir
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
-path    = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], cfg['paths']['folder'])
-dumpdir = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], 'graph'); create_dir(dumpdir)
-astdir  = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], 'AST');   create_dir(astdir)
+path     = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], cfg['paths']['folder'])
+dumpdir  = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], 'graph'); create_dir(dumpdir)
+astdir   = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], 'AST');   create_dir(astdir)
 traindir = os.path.join(dumpdir, 'train');              create_dir(traindir)
 testdir  = os.path.join(dumpdir, 'test');               create_dir(testdir)
 valdir   = os.path.join(dumpdir, 'val');                create_dir(valdir)
@@ -63,9 +63,19 @@ if cfg['run']['preprocess']:
 else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
 
-ast_processor.process(ast_paths=all_ast_dump,
-                      save_dir=dumpdir,
-                      verbose=cfg['run']['verbose'],
-                      test_ratio=1.0-cfg['experiment']['train_ratio'],
-                      val_ratio=cfg['experiment']['val_ratio'],
-                      prefix=cfg['paths']['folder'])
+if cfg['experiment']['graph_type'] == 'project_graph':
+    ast_processor.process(ast_paths=all_ast_dump,
+                          save_dir=dumpdir,
+                          verbose=cfg['run']['verbose'],
+                          test_ratio=1.0-cfg['experiment']['train_ratio'],
+                          val_ratio=cfg['experiment']['val_ratio'],
+                          prefix=cfg['paths']['folder'])
+
+elif cfg['experiment']['graph_type'] == 'file_graph':
+    for idx, file in enumerate(all_ast_dump):
+        ast_processor.process(ast_paths=[file],
+                              save_dir=dumpdir,
+                              verbose=cfg['run']['verbose'],
+                              test_ratio=1.0-cfg['experiment']['train_ratio'],
+                              val_ratio=cfg['experiment']['val_ratio'],
+                              prefix=str(idx)+"_"+cfg['paths']['folder'])

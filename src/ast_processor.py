@@ -45,7 +45,7 @@ class ASTProcessor(object):
         self.verbose    = verbose
         self.test_ratio = test_ratio
         self.val_ratio  = val_ratio
-        self.save_dir   = save_dir
+        self.save_dir   = save_dir; utils.create_dir(save_dir)
         self.prefix     = prefix
         self.one_hot_features = True
         # Global
