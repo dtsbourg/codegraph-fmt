@@ -69,8 +69,14 @@ else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
 
 if cfg['experiment']['graph_type'] == 'project_graph':
-    ast_processor.process(ast_paths=all_ast_dump,
-                          save_dir=dumpdir,
+    ast_processor.process(ast_paths=train_files,
+                          save_dir=os.path.join(dumpdir, 'train'),
+                          verbose=cfg['run']['verbose'],
+                          test_ratio=1.0-cfg['experiment']['train_ratio'],
+                          val_ratio=cfg['experiment']['val_ratio'],
+                          prefix=cfg['paths']['folder'])
+    ast_processor.process(ast_paths=test_files,
+                          save_dir=os.path.join(dumpdir, 'test'),
                           verbose=cfg['run']['verbose'],
                           test_ratio=1.0-cfg['experiment']['train_ratio'],
                           val_ratio=cfg['experiment']['val_ratio'],
