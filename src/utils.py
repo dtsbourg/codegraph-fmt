@@ -60,9 +60,13 @@ def load_asts(path, verbose=False):
         print("[ERROR] Could not load pre-generated ASTs from", path, ".")
         print("[ERROR] Please run again with the --preprocess flag enabled.")
 
-def one_hot_encoder(x, size):
+def one_hot_encoder(x, size, max=None, min=None):
     x = np.array(x)
-    n_types = np.max(x) + 1 - np.min(x)
+    if max is None:
+        max = np.max(x)
+    if min is None:
+        min = np.min(x)
+    n_types =  max + 1 - min
     x_one_hot = np.zeros((size, n_types))
     x_one_hot[np.arange(size), x] = 1
     return x_one_hot

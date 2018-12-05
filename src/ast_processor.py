@@ -17,6 +17,7 @@ import os
 import numpy as np
 
 from ast_transformer import ASTVisitor
+from ast_utils import AST_SYMBOL_DICT
 
 def process(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix):
     '''
@@ -177,7 +178,7 @@ class ASTProcessor(object):
         '''
         # 1. Save features
         if self.one_hot_features:
-            features = utils.one_hot_encoder(self.features, self.node_count)
+            features = utils.one_hot_encoder(self.features, self.node_count, min=0,max=max(AST_SYMBOL_DICT.values()))
         else:
             features = np.array(self.features).reshape(-1, 1)
 
