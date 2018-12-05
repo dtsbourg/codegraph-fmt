@@ -41,9 +41,8 @@ if cfg.preprocess:
     for idx,p in enumerate(paths):
         if cfg.verbose:
             print("[MAIN] Processing path", p)
-
-        parsed_file = str(os.path.basename(p))
-        save_file = 'AST-bin-dump-'+parsed_file
+            
+        save_file = 'AST-bin-dump-'+"_".join(p.split('/')[2:])
 
         parsed_ast = utils.parse_file(p, verbose=cfg.verbose)
         ast_dump_file = os.path.join(astdir, save_file+'.ast')
