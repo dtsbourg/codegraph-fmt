@@ -1,0 +1,11 @@
+run:
+    preprocess: True        # If flag is passed, the ASTs will be re-generated. Otherwise, the script will load pre-generated AST
+    verbose: True
+paths:
+    datadir: "../data"      # Path to the top level data directory.
+    name: "code-sample"    # Identifier for the mined directory.
+    folder: "raw"           # Raw code folder identifier.
+    pregenpath: "AST"       # Pre-generated AST folder identifier.
+experiment:
+    train_ratio: 0.8        # At a file level, fraction of training samples
+    val_ratio: 0.2          # At a file level, fraction of validation samples

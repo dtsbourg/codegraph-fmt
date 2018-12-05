@@ -10,24 +10,19 @@ import os
 from collections import namedtuple
 import astor
 import argparse
+import yaml
+from utils import create_dir
 
 # CFG
-parser = argparse.ArgumentParser(description="Configure the AST generation and parsing script.",
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
 
-parser.add_argument("--verbose",    action="store_true", dest="verbose")
-parser.add_argument("--preprocess", action="store_true", dest="preprocess", help="If flag is passed, the ASTs will be re-generated. Otherwise, the script will load pre-generated AST")
-parser.add_argument("-d", "--datadir",    type=str, default="../data",      dest="datadir",    help="Path to the top level data directory.")
-parser.add_argument("-n", "--name",       type=str, default="code-sample",  dest="name",       help="Identifier for the mined directory.")
-parser.add_argument("-c", "--codefolder", type=str, default="raw",          dest="codefolder", help="Raw code folder identifier.")
-parser.add_argument("-p", "--pregenpath", type=str, default="AST",          dest="pregenpath", help="Pre-generated AST folder identifier.")
-cfg = parser.parse_args()
-
-path    = os.path.join(cfg.datadir, cfg.name, cfg.codefolder)
-dumpdir = os.path.join(cfg.datadir, cfg.name, 'graph')
-astdir  = os.path.join(cfg.datadir, cfg.name, 'AST')
-if not os.path.exists(dumpdir):
-    os.makedirs(dumpdir)
+path    = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], cfg['paths']['folder'])
+dumpdir = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], 'graph'); create_dir(dumpdir)
+astdir  = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], 'AST');   create_dir(astdir)
+traindir = os.path.join(dumpdir, 'train');              create_dir(traindir)
+testdir  = os.path.join(dumpdir, 'test');               create_dir(testdir)
+valdir   = os.path.join(dumpdir, 'val');                create_dir(valdir)
 # END CFG
 
 import project_crawler
@@ -35,16 +30,16 @@ import utils
 import ast_transformer
 import ast_processor
 
-if cfg.preprocess:
-    paths = project_crawler.crawl(path, verbose=cfg.verbose)
+if cfg['run']['preprocess']:
+    paths = project_crawler.crawl(path, verbose=cfg['run']['verbose'])
     all_ast_dump = []; parse_map = {}
     for idx,p in enumerate(paths):
-        if cfg.verbose:
+        if cfg['run']['verbose']:
             print("[MAIN] Processing path", p)
-            
+
         save_file = 'AST-bin-dump-'+"_".join(p.split('/')[2:])
 
-        parsed_ast = utils.parse_file(p, verbose=cfg.verbose)
+        parsed_ast = utils.parse_file(p, verbose=cfg['run']['verbose'])
         ast_dump_file = os.path.join(astdir, save_file+'.ast')
         all_ast_dump.append(ast_dump_file)
         utils.save(ast=parsed_ast, filename=ast_dump_file, format='pickle')
@@ -63,14 +58,14 @@ if cfg.preprocess:
     print("[MAIN]  --- Saved parsed AST for {0} files in {1}.".format(len(paths), dumpdir))
     print()
 
-    utils.save_json(parse_map, save_dir=dumpdir, filename=cfg.codefolder+'-parse_map.json')
+    utils.save_json(parse_map, save_dir=dumpdir, filename=cfg['paths']['folder']+'-parse_map.json')
 
 else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
 
 ast_processor.process(ast_paths=all_ast_dump,
                       save_dir=dumpdir,
-                      verbose=cfg.verbose,
-                      test_ratio=0.2,
-                      val_ratio=0.2,
-                      prefix=cfg.codefolder)
+                      verbose=cfg['run']['verbose'],
+                      test_ratio=1.0-cfg['experiment']['train_ratio'],
+                      val_ratio=cfg['experiment']['val_ratio'],
+                      prefix=cfg['paths']['folder'])

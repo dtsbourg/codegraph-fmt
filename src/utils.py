@@ -83,3 +83,7 @@ def invert_var_map(var_map):
         else:
             inv_var_map[var_name].append(node_id)
     return inv_var_map
+
+def create_dir(d):
+    if not os.path.exists(d):
+        os.makedirs(d)
