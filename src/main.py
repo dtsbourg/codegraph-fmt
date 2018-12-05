@@ -23,6 +23,8 @@ astdir   = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], 'AST');  
 traindir = os.path.join(dumpdir, 'train');              create_dir(traindir)
 testdir  = os.path.join(dumpdir, 'test');               create_dir(testdir)
 valdir   = os.path.join(dumpdir, 'val');                create_dir(valdir)
+
+
 # END CFG
 
 import project_crawler
@@ -30,9 +32,12 @@ import utils
 import ast_transformer
 import ast_processor
 
+train_files = project_crawler.crawl(os.path.join(path, 'keras'), verbose=False)
+test_files  = project_crawler.crawl(os.path.join(path, 'examples'), verbose=False)
+
 if cfg['run']['preprocess']:
     paths = project_crawler.crawl(path, verbose=cfg['run']['verbose'])
-    all_ast_dump = []; parse_map = {}
+    all_ast_dump = []; parse_map = {}; train_asts = {}; test_asts = {}
     for idx,p in enumerate(paths):
         if cfg['run']['verbose']:
             print("[MAIN] Processing path", p)
@@ -73,8 +78,14 @@ if cfg['experiment']['graph_type'] == 'project_graph':
 
 elif cfg['experiment']['graph_type'] == 'file_graph':
     for idx, file in enumerate(all_ast_dump):
+        if parse_map[file] in train_files:
+            save_path = 'train'
+        elif parse_map[file] in test_files:
+            save_path = 'test'
+        else:
+            continue
         ast_processor.process(ast_paths=[file],
-                              save_dir=dumpdir,
+                              save_dir=os.path.join(dumpdir, save_path),
                               verbose=cfg['run']['verbose'],
                               test_ratio=1.0-cfg['experiment']['train_ratio'],
                               val_ratio=cfg['experiment']['val_ratio'],
