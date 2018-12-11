@@ -68,16 +68,16 @@ class ASTVisitor(ast.NodeVisitor):
         Is called upon visit to every node.
         '''
         if not hasattr(node, 'visited'):
-            self.collect_metadata(node)
+            if not type(node) in ast_utils.EXPR_CONTENT_SYMBOLS:
+                self.collect_metadata(node)
+                self.nodes_stack.append(node)
 
-            self.nodes_stack.append(node)
+                token_id = ast_utils.get_token_id(node)
+                if token_id == -1:
+                    print("[WARNING] --- Found unkown token", node)
 
-            token_id = ast_utils.get_token_id(node)
-            if token_id == -1:
-                print("[WARNING] --- Found unkown token", node)
-
-            self.feature_list.append(token_id)
-            self.classes_list.append(ast_utils.get_token_class_id(node))
-            node.visited = True
+                self.feature_list.append(token_id)
+                self.classes_list.append(ast_utils.get_token_class_id(node))
+                node.visited = True
 
         ast.NodeVisitor.generic_visit(self, node)

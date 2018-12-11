@@ -14,7 +14,7 @@ import yaml
 from utils import create_dir
 
 # CFG
-with open("config.yml", 'r') as ymlfile:
+with open("config-keras.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
 path     = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], cfg['paths']['folder'])
