@@ -50,10 +50,7 @@ class ASTVisitor(ast.NodeVisitor):
         self.prev_line_no    = 0
         self.prev_col_offset = 0
 
-    def generic_visit(self, node):
-        '''
-        Is called upon visit to every node.
-        '''
+    def collect_metadata(self,node):
         if isinstance(node, ast.Name):
             if type(node.ctx) is not ast.Load:
                 node.varname = node.id
@@ -66,7 +63,13 @@ class ASTVisitor(ast.NodeVisitor):
             node.col_offset = -1
         self.prev_col_offset = node.col_offset
 
+    def generic_visit(self, node):
+        '''
+        Is called upon visit to every node.
+        '''
         if not hasattr(node, 'visited'):
+            self.collect_metadata(node)
+
             self.nodes_stack.append(node)
 
             token_id = ast_utils.get_token_id(node)

@@ -94,3 +94,11 @@ elif cfg['experiment']['graph_type'] == 'file_graph':
                               test_ratio=1.0-cfg['experiment']['train_ratio'],
                               val_ratio=cfg['experiment']['val_ratio'],
                               prefix=str(idx)+"_"+cfg['paths']['folder'])
+
+elif cfg['experiment']['graph_type'] == 'test':
+    ast_processor.process(ast_paths=all_ast_dump,
+                          save_dir=dumpdir,
+                          verbose=cfg['run']['verbose'],
+                          test_ratio=1.0,
+                          val_ratio=cfg['experiment']['val_ratio'],
+                          prefix=str(idx)+"_"+cfg['paths']['folder'])

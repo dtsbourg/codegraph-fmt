@@ -17,7 +17,7 @@ import os
 import numpy as np
 
 from ast_transformer import ASTVisitor
-from ast_utils import AST_SYMBOL_DICT
+from ast_utils import AST_SYMBOL_DICT, should_filter
 
 def process(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix):
     '''
@@ -111,28 +111,30 @@ class ASTProcessor(object):
         '''
         top_node = self.node_count
         for i, node in enumerate(visitor.nodes_stack):
-            # Split train / test / val
-            val, train = False, True
-            rand = np.random.rand(1)[0]
-            if rand < self.test_ratio:
-                train = False
-            elif rand > 1-self.val_ratio:
-                val = True
+            if not should_filter(node):
+                # Split train / test / val
+                val, train = False, True
+                rand = np.random.rand(1)[0]
+                if rand < self.test_ratio:
+                    train = False
+                elif rand > 1-self.val_ratio:
+                    val = True
 
-            # Add nodes to networkx graph
-            self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': val, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
-            node.graph_id = self.node_count # This is never used???
+                # Add nodes to networkx graph
+                self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': val, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
+                node.graph_id = self.node_count # This is never used???
 
-            # Populate feature maps
-            self.id_map[self.node_count] = self.node_count
-            self.source_map[self.node_count] = (top_node, node.lineno, node.col_offset)
+                # Populate feature maps
+                self.id_map[self.node_count] = self.node_count
+                self.source_map[self.node_count] = (top_node, node.lineno, node.col_offset)
 
-            if hasattr(node, 'varname'):
-                self.var_map[self.node_count] = node.varname
+                if hasattr(node, 'varname'):
+                    self.var_map[self.node_count] = node.varname
 
-            for child in ast.iter_child_nodes(node):
-                child_index = visitor.nodes_stack.index(child)
-                self.G.add_edge(self.node_count, last_full_graph_node_count + child_index) # child may be lower down the stack
+                for child in ast.iter_child_nodes(node):
+                    if not should_filter(child):
+                        child_index = visitor.nodes_stack.index(child)
+                        self.G.add_edge(self.node_count, last_full_graph_node_count + child_index) # child may be lower down the stack
 
             self.node_count +=  1
         return top_node
