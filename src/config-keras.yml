@@ -12,4 +12,4 @@ experiment:
     graph_type: "project_graph" # Graph granularity level ("file_graph" for one graph per file, "project_graph" for one large graph)
     train_files: ['keras']          # Directory of files to build the training graph(s) from
     test_files: ['examples']        # Directory of files to build the test graph(s) from
-    dense: False
+    dense: True 

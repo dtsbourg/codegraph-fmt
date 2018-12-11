@@ -20,11 +20,11 @@ import itertools
 from ast_transformer import ASTVisitor
 from ast_utils import AST_SYMBOL_DICT, should_filter
 
-def process(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix):
+def process(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense):
     '''
     Run the processor from within the module to avoid persistance of ASTProcessor object.
     '''
-    processor = ASTProcessor(ast_paths=ast_paths, save_dir=save_dir, verbose=verbose, test_ratio=test_ratio, val_ratio=val_ratio, prefix=prefix)
+    processor = ASTProcessor(ast_paths=ast_paths, save_dir=save_dir, verbose=verbose, test_ratio=test_ratio, val_ratio=val_ratio, prefix=prefix, dense=dense)
     processor.process()
 
 class ASTProcessor(object):
