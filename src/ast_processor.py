@@ -15,6 +15,7 @@ import ast
 import json
 import os
 import numpy as np
+import itertools
 
 from ast_transformer import ASTVisitor
 from ast_utils import AST_SYMBOL_DICT, should_filter
@@ -31,7 +32,7 @@ class ASTProcessor(object):
     ASTProcessor class. This is the main abstraction with which passes on the AST are done.
     It also provides an interface to dump the processed AST to networkx-compatible graphs.
     '''
-    def __init__(self, ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix):
+    def __init__(self, ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense):
         '''
         Args:
             ast_paths : List of paths to pre-processed ASTs (.ast/pickle format by default)
@@ -40,6 +41,7 @@ class ASTProcessor(object):
             val_ratio: Proportion of nodes reserved for validation in the entire graph
             verbose   : Verbose flag
             prefix    : Prefix appended to file when saved
+            dense     : If true, add edges between children
         '''
         # Config
         self.ast_paths  = ast_paths
@@ -49,6 +51,7 @@ class ASTProcessor(object):
         self.save_dir   = save_dir; utils.create_dir(save_dir)
         self.prefix     = prefix
         self.one_hot_features = True
+        self.dense      = dense
         # Global
         self.top_nodes  = []            # List of the root nodes corresponding to each of the ASTs
         self.G          = nx.Graph()
@@ -131,10 +134,15 @@ class ASTProcessor(object):
                 if hasattr(node, 'varname'):
                     self.var_map[self.node_count] = node.varname
 
+                children = []
                 for child in ast.iter_child_nodes(node):
                     if not should_filter(child):
                         child_index = visitor.nodes_stack.index(child)
+                        children.append(child_index)
                         self.G.add_edge(self.node_count, last_full_graph_node_count + child_index) # child may be lower down the stack
+                if self.dense:
+                    for src, tgt in itertools.combinations(children, 2):
+                        self.G.add_edge(last_full_graph_node_count+src, last_full_graph_node_count+tgt)
 
             self.node_count +=  1
         return top_node

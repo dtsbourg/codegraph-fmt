@@ -12,3 +12,4 @@ experiment:
     graph_type: "test" # Graph granularity level ("file_graph" for one graph per file, "project_graph" for one large graph)
     train_files: ['']          # Directory of files to build the training graph(s) from
     test_files: ['main']        # Directory of files to build the test graph(s) from
+    dense: False

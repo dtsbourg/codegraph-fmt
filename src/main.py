@@ -14,7 +14,7 @@ import yaml
 from utils import create_dir
 
 # CFG
-with open("config-keras.yml", 'r') as ymlfile:
+with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
 path     = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], cfg['paths']['folder'])
@@ -72,13 +72,15 @@ if cfg['experiment']['graph_type'] == 'project_graph':
                           verbose=cfg['run']['verbose'],
                           test_ratio=1.0-cfg['experiment']['train_ratio'],
                           val_ratio=cfg['experiment']['val_ratio'],
-                          prefix=cfg['paths']['folder'])
+                          prefix=cfg['paths']['folder'],
+                          dense=cfg['experiment']['dense'])
     ast_processor.process(ast_paths=[f for f in all_ast_dump if parse_map[f] in test_files],
                           save_dir=os.path.join(dumpdir, 'test'),
                           verbose=cfg['run']['verbose'],
                           test_ratio=1.0-cfg['experiment']['train_ratio'],
                           val_ratio=cfg['experiment']['val_ratio'],
-                          prefix=cfg['paths']['folder'])
+                          prefix=cfg['paths']['folder'],
+                          dense=cfg['experiment']['dense'])
 
 elif cfg['experiment']['graph_type'] == 'file_graph':
     for idx, file in enumerate(all_ast_dump):
@@ -93,7 +95,8 @@ elif cfg['experiment']['graph_type'] == 'file_graph':
                               verbose=cfg['run']['verbose'],
                               test_ratio=1.0-cfg['experiment']['train_ratio'],
                               val_ratio=cfg['experiment']['val_ratio'],
-                              prefix=str(idx)+"_"+cfg['paths']['folder'])
+                              prefix=str(idx)+"_"+cfg['paths']['folder'],
+                              dense=cfg['experiment']['dense'])
 
 elif cfg['experiment']['graph_type'] == 'test':
     ast_processor.process(ast_paths=all_ast_dump,
@@ -101,4 +104,5 @@ elif cfg['experiment']['graph_type'] == 'test':
                           verbose=cfg['run']['verbose'],
                           test_ratio=1.0,
                           val_ratio=cfg['experiment']['val_ratio'],
-                          prefix=str(idx)+"_"+cfg['paths']['folder'])
+                          prefix=str(idx)+"_"+cfg['paths']['folder'],
+                          dense=cfg['experiment']['dense'])
