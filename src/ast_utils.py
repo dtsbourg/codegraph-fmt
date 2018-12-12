@@ -76,13 +76,15 @@ def is_func_def(node):
     return isinstance(node, FunctionDef)
 
 def is_func_call(node):
-    return isinstance(node, Call)
+    return isinstance(node, Call) and isinstance(node.func, Name)
 
 def is_func(node):
     return is_func_def(node) or is_func_call(node)
 
 def get_func_name(node):
     if is_func_call(node):
+        if isinstance(node.func, Attribute):
+            print(node, node.__dict__)
         return node.func.id
     elif is_func_def(node):
         return node.name
