@@ -70,3 +70,7 @@ def get_token_id(node):
 def should_filter(node):
     t = type(node)
     return t in EXPR_CONTENT_SYMBOLS
+
+def is_func(node):
+    t = type(node)
+    return t == FunctionDef

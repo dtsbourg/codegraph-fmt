@@ -18,7 +18,7 @@ import numpy as np
 import itertools
 
 from ast_transformer import ASTVisitor
-from ast_utils import AST_SYMBOL_DICT, should_filter
+from ast_utils import AST_SYMBOL_DICT, should_filter, is_func
 
 def process(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense):
     '''
@@ -61,7 +61,7 @@ class ASTProcessor(object):
         self.source_map = {}            # Graph node id to tuple of (top_node, line number, col offset) for inverse lookup
         self.file_map   = {}            # Mapping root node ids to corresponding files
         self.var_map    = {}            # Mapping node ids to variable names, if applicable
-        self.inv_var_map = {}
+        self.func_map   = {}            # Mapping node ids to function names, if applicable
 
         self.node_count = 0
         self.ast_count  = len(self.ast_paths)
@@ -124,15 +124,20 @@ class ASTProcessor(object):
                     val = True
 
                 # Add nodes to networkx graph
-                self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': val, 'feature': visitor.feature_list[i]}) #TODO: convert it to one-hot?
+                self.G.add_node(self.node_count, attr_dict={'train': train, 'test': not train, 'val': val})
                 node.graph_id = self.node_count # This is never used???
 
                 # Populate feature maps
                 self.id_map[self.node_count] = self.node_count
                 self.source_map[self.node_count] = (top_node, node.lineno, node.col_offset)
 
+                # Retrieve variable names
                 if hasattr(node, 'varname'):
                     self.var_map[self.node_count] = node.varname
+
+                # Retrieve function names
+                if is_func(node):
+                    self.func_map[self.node_count] = node.name
 
                 children = []
                 for child in ast.iter_child_nodes(node):
@@ -184,7 +189,8 @@ class ASTProcessor(object):
         4. source_map.json  --> a map of AST token identifiers to positions in the source code.
         5. G.json           --> a networkx compatible graph representation of the AST.
         6. class_map.json   --> a map of node_id to class.
-        6. var_map.json   --> a map of node_id to variable names (when applicable).
+        7. var_map.json     --> a map of node_id to variable names (when applicable).
+        8. var_map.json     --> a map of node_id to function names (when applicable).
         '''
         # 1. Save features
         if self.one_hot_features:
@@ -212,3 +218,5 @@ class ASTProcessor(object):
         utils.save_json(class_map, save_dir=self.save_dir, filename=self.prefix+'-class_map.json')
         # 7. Save variable names
         utils.save_json(self.var_map, save_dir=self.save_dir, filename=self.prefix+'-var_map.json')
+        # 8. Save function names
+        utils.save_json(self.func_map, save_dir=self.save_dir, filename=self.prefix+'-func_map.json')

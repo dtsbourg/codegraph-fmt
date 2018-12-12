@@ -68,7 +68,7 @@ class ASTVisitor(ast.NodeVisitor):
         Is called upon visit to every node.
         '''
         if not hasattr(node, 'visited'):
-            if not type(node) in ast_utils.EXPR_CONTENT_SYMBOLS:
+            if not ast_utils.should_filter(node):
                 self.collect_metadata(node)
                 self.nodes_stack.append(node)
 
