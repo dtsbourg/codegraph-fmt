@@ -132,12 +132,12 @@ class ASTProcessor(object):
                 self.source_map[self.node_count] = (top_node, node.lineno, node.col_offset)
 
                 # Retrieve variable names
-                if hasattr(node, 'varname'):
-                    self.var_map[self.node_count] = node.varname
+                if hasattr(node, 'var_name'):
+                    self.var_map[self.node_count] = node.var_name
 
                 # Retrieve function names
-                if is_func(node):
-                    self.func_map[self.node_count] = node.name
+                if hasattr(node, 'func_name'):
+                    self.func_map[self.node_count] = node.func_name
 
                 children = []
                 for child in ast.iter_child_nodes(node):

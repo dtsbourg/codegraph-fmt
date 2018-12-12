@@ -71,10 +71,23 @@ def should_filter(node):
     t = type(node)
     return t in EXPR_CONTENT_SYMBOLS
 
-def is_func(node):
-    t = type(node)
-    return t == FunctionDef
+# Functions
+def is_func_def(node):
+    return isinstance(node, FunctionDef)
 
+def is_func_call(node):
+    return isinstance(node, Call)
+
+def is_func(node):
+    return is_func_def(node) or is_func_call(node)
+
+def get_func_name(node):
+    if is_func_call(node):
+        return node.func.id
+    elif is_func_def(node):
+        return node.name
+
+# Variables
 def is_var_def(node):
     return isinstance(node, Name) and not isinstance(node.ctx, Load)
 
