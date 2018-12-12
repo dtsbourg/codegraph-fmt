@@ -51,9 +51,8 @@ class ASTVisitor(ast.NodeVisitor):
         self.prev_col_offset = 0
 
     def collect_metadata(self,node):
-        if isinstance(node, ast.Name):
-            if type(node.ctx) is not ast.Load:
-                node.varname = node.id
+        if ast_utils.is_variable(node):
+            node.varname = ast_utils.get_varname(node)
 
         if not hasattr(node, 'lineno'):
             node.lineno = -1
