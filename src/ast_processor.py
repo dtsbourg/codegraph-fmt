@@ -54,7 +54,7 @@ class ASTProcessor(object):
         self.dense      = dense
         # Global
         self.top_nodes  = []            # List of the root nodes corresponding to each of the ASTs
-        self.G          = nx.Graph()
+        self.G          = nx.DiGraph()
         self.id_map     = {}            # Maps node ids to their index in the feature array
         self.features   = []            # Feature array
         self.classes    = []
@@ -172,7 +172,7 @@ class ASTProcessor(object):
         if self.add_root_node:
             self.G.add_node(self.node_count, attr_dict={'train': True, 'test': False, 'val': False, 'feature': 0})
             self.id_map[self.node_count] = self.node_count
-            self.features.append(0)
+            self.features.append(np.zeros(64+104))
             self.classes.append(13)
 
             for top_node in self.top_nodes:
@@ -193,10 +193,11 @@ class ASTProcessor(object):
         8. var_map.json     --> a map of node_id to function names (when applicable).
         '''
         # 1. Save features
-        if self.one_hot_features:
-            features = utils.one_hot_encoder(self.features, self.node_count, min=0,max=max(AST_SYMBOL_DICT.values()))
-        else:
-            features = np.array(self.features).reshape(-1, 1)
+        # if self.one_hot_features:
+        #     features = utils.one_hot_encoder(self.features, self.node_count, min=0,max=max(AST_SYMBOL_DICT.values()))
+        # else:
+        #     features = np.array(self.features).reshape(-1, 1)
+        features = self.features
 
         feature_path = os.path.join(self.save_dir, self.prefix+'-feats.npy')
         np.save(feature_path, features)

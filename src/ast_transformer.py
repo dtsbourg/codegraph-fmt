@@ -13,6 +13,10 @@ import astor
 import networkx as nx
 import ast
 import ast_utils
+from ast_utils import AST_SYMBOL_DICT
+import feature_utils
+import utils
+import numpy as np
 
 class SAGEWalker(astor.TreeWalk):
     '''
@@ -51,7 +55,7 @@ class ASTVisitor(ast.NodeVisitor):
         self.prev_col_offset = 0
 
     def collect_metadata(self,node):
-        if ast_utils.is_func(node):
+        if ast_utils.is_func_def(node):
             node.func_name = ast_utils.get_func_name(node)
 
         if ast_utils.is_variable(node):
@@ -78,7 +82,13 @@ class ASTVisitor(ast.NodeVisitor):
                 if token_id == -1:
                     print("[WARNING] --- Found unkown token", node)
 
-                self.feature_list.append(token_id)
+                ft = feature_utils.token2vec(node)
+                one_hot_token_type = utils.one_hot_encoder(token_id, 1, min=0,max=max(AST_SYMBOL_DICT.values()))
+
+                if np.count_nonzero(np.isnan(ft)) > 0:
+                    print("Found nan", node)
+                    ft = np.zeros(64)
+                self.feature_list.append(np.concatenate([ft, one_hot_token_type[0]]))
                 self.classes_list.append(ast_utils.get_token_class_id(node))
                 node.visited = True
 
