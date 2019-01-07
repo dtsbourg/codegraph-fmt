@@ -45,7 +45,7 @@ class ASTVisitor(ast.NodeVisitor):
     '''
     Example subclass of a visitor.
     '''
-    def __init__(self, verbose):
+    def __init__(self, verbose, slot):
         super().__init__()
         self.verbose         = verbose
         self.nodes_stack     = []
@@ -53,6 +53,7 @@ class ASTVisitor(ast.NodeVisitor):
         self.classes_list    = []
         self.prev_line_no    = 0
         self.prev_col_offset = 0
+        self.slot            = slot
 
     def collect_metadata(self,node):
         if ast_utils.is_func_def(node):
@@ -82,11 +83,11 @@ class ASTVisitor(ast.NodeVisitor):
                 if token_id == -1:
                     print("[WARNING] --- Found unkown token", node)
 
-                ft = feature_utils.token2vec(node)
-                one_hot_token_type = utils.one_hot_encoder(token_id, 1, min=0,max=max(AST_SYMBOL_DICT.values()))
+                ft = feature_utils.token2vec(node, slot=self.slot)
+                one_hot_token_type = utils.one_hot_encoder(token_id, 1, min=0, max=max(AST_SYMBOL_DICT.values()))
 
                 if np.count_nonzero(np.isnan(ft)) > 0:
-                    print("Found nan", node)
+                    print("[WARNING] Found nan feature for node", node)
                     ft = np.zeros(64)
                 self.feature_list.append(np.concatenate([ft, one_hot_token_type[0]]))
                 self.classes_list.append(ast_utils.get_token_class_id(node))

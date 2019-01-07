@@ -28,7 +28,7 @@ def camel_case_split(identifier):
     matches = re.finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', identifier)
     return [m.group(0) for m in matches]
 
-def token2vec(token):
+def token2vec(token, slot=None):
     MODEL_PATH = "../token2vec.model"
     model = load_model(MODEL_PATH)
 
@@ -37,6 +37,16 @@ def token2vec(token):
     strtok = type(token).__name__
     if ast_utils.is_variable(token):
         strtok = ast_utils.get_varname(token)
-    subtoks = flatten([camel_case_split(v) for v in strtok.split('_')])
 
-    return np.mean([model[sk] for sk in subtoks], axis=0)
+    if strtok == slot:
+        print("[MASK] replaced {}".format(strtok))
+        embd = model["[MASK]"]
+    else:
+        subtoks = flatten([camel_case_split(v) for v in strtok.split('_')])
+        try:
+            embd = np.mean([model[sk] for sk in subtoks], axis=0)
+        except Exception as e:
+            print("[UNK] replaced token {}".format(strtok))
+            embd = model["[UNK]"]
+
+    return embd

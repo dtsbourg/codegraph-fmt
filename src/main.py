@@ -12,6 +12,7 @@ import astor
 import argparse
 import yaml
 from utils import create_dir
+import json
 
 # CFG
 with open("config-keras.yml", 'r') as ymlfile:
@@ -97,6 +98,35 @@ elif cfg['experiment']['graph_type'] == 'file_graph':
                               val_ratio=cfg['experiment']['val_ratio'],
                               prefix=str(idx)+"_"+cfg['paths']['folder'],
                               dense=cfg['experiment']['dense'])
+
+elif cfg['experiment']['graph_type'] == 'slot_graph':
+    # ast_processor.process(ast_paths=[f for f in all_ast_dump if parse_map[f] in train_files],
+    #                       save_dir=os.path.join(dumpdir, 'train'),
+    #                       verbose=cfg['run']['verbose'],
+    #                       test_ratio=1.0-cfg['experiment']['train_ratio'],
+    #                       val_ratio=cfg['experiment']['val_ratio'],
+    #                       prefix=cfg['paths']['folder'],
+    #                       dense=cfg['experiment']['dense'],
+    #                       global_voc={})
+
+    with open(os.path.join(dumpdir, 'train', cfg['paths']['folder']+'-var_map.json')) as f:
+        data = json.load(f)
+    global_voc = list(set(data.values()))
+    # print(global_voc)
+    for idx, file in enumerate(all_ast_dump):
+        if parse_map[file] in test_files:
+            save_path = 'test'
+        else:
+            continue
+        ast_processor.process_slots(ast_paths=[file],
+                              save_dir=os.path.join(dumpdir, save_path),
+                              verbose=cfg['run']['verbose'],
+                              test_ratio=0.0,
+                              val_ratio=0.0,
+                              prefix=str(idx)+"_"+cfg['paths']['folder'],
+                              dense=cfg['experiment']['dense'],
+                              global_voc=global_voc)
+
 
 elif cfg['experiment']['graph_type'] == 'test':
     ast_processor.process(ast_paths=all_ast_dump,

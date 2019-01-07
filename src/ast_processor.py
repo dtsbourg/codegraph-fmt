@@ -20,25 +20,47 @@ import itertools
 from ast_transformer import ASTVisitor
 from ast_utils import AST_SYMBOL_DICT, should_filter, is_func
 
-def process(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense):
+def process(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense, global_voc):
     '''
     Run the processor from within the module to avoid persistance of ASTProcessor object.
     '''
-    processor = ASTProcessor(ast_paths=ast_paths, save_dir=save_dir, verbose=verbose, test_ratio=test_ratio, val_ratio=val_ratio, prefix=prefix, dense=dense)
+    processor = ASTProcessor(ast_paths=ast_paths,
+                             save_dir=save_dir,
+                             verbose=verbose,
+                             test_ratio=test_ratio,
+                             val_ratio=val_ratio,
+                             prefix=prefix,
+                             dense=dense,
+                             global_voc=global_voc)
     processor.process()
+
+
+def process_slots(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense, global_voc):
+    '''
+    Run the processor from within the module to avoid persistance of ASTProcessor object.
+    '''
+    processor = ASTProcessor(ast_paths=ast_paths,
+                             save_dir=save_dir,
+                             verbose=verbose,
+                             test_ratio=test_ratio,
+                             val_ratio=val_ratio,
+                             prefix=prefix,
+                             dense=dense,
+                             global_voc=global_voc)
+    processor.process_slots()
 
 class ASTProcessor(object):
     '''
     ASTProcessor class. This is the main abstraction with which passes on the AST are done.
     It also provides an interface to dump the processed AST to networkx-compatible graphs.
     '''
-    def __init__(self, ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense):
+    def __init__(self, ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense, global_voc):
         '''
         Args:
             ast_paths : List of paths to pre-processed ASTs (.ast/pickle format by default)
             save_dir  : Path to save output of AST processing
             test_ratio: Proportion of nodes reserved for testing in the entire graph
-            val_ratio: Proportion of nodes reserved for validation in the entire graph
+            val_ratio : Proportion of nodes reserved for validation in the entire graph
             verbose   : Verbose flag
             prefix    : Prefix appended to file when saved
             dense     : If true, add edges between children
@@ -62,11 +84,46 @@ class ASTProcessor(object):
         self.file_map   = {}            # Mapping root node ids to corresponding files
         self.var_map    = {}            # Mapping node ids to variable names, if applicable
         self.func_map   = {}            # Mapping node ids to function names, if applicable
+        self.global_voc = global_voc
 
         self.node_count = 0
         self.ast_count  = len(self.ast_paths)
         self.add_root_node = self.ast_count > 1
 
+    def process_slots(self):
+        '''Run the AST processing pipeline as follows:
+
+        For each AST files:
+            For each node
+                Build the node features
+            Build the equivalent networkx graph
+        Add a virtual root node
+        Output to .json
+        '''
+        last_full_graph_node_count = 0
+
+        for idx, ast_path in enumerate(self.ast_paths):
+            print("\r[AST]  --- Processing AST for file {0}/{1} ...".format(idx+1,len(self.ast_paths)), end='\r')
+
+            self.global_voc = ["x_train"]
+
+            for word in self.global_voc:
+                ast = utils.load(ast_path)
+                visitor = self.process_ast(ast, slot=word)
+
+                self.features.extend(visitor.feature_list)
+                self.classes.extend(visitor.classes_list)
+
+                top_node = self.process_nodes(visitor, last_full_graph_node_count)
+                self.process_top_nodes(top_node, ast_path)
+
+                last_full_graph_node_count = self.node_count
+
+            print()
+
+            self.add_virtual_root_node()
+            self.prefix += "-SLOT_"+word
+            self.generate_json()
 
     def process(self):
         '''Run the AST processing pipeline as follows:
@@ -152,7 +209,7 @@ class ASTProcessor(object):
             self.node_count +=  1
         return top_node
 
-    def process_ast(self, ast):
+    def process_ast(self, ast, slot=None):
         '''Process an entire AST.
         Args:
             ast : an ast object
@@ -160,7 +217,7 @@ class ASTProcessor(object):
         Returns:
             visitor : an ASTVisitor object which contains the stack of visited nodes
         '''
-        visitor = ASTVisitor(self.verbose)
+        visitor = ASTVisitor(self.verbose, slot=slot)
         visitor.visit(ast) # <-- This could probably be optimized to loop just once with process_nodes
 
         return visitor
