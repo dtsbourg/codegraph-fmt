@@ -74,6 +74,7 @@ class ASTProcessor(object):
         self.prefix     = prefix
         self.one_hot_features = True
         self.dense      = dense
+        self.include_vectorized_tokens = False
         # Global
         self.top_nodes  = []            # List of the root nodes corresponding to each of the ASTs
         self.G          = nx.DiGraph()
@@ -109,7 +110,7 @@ class ASTProcessor(object):
 
             for word in self.global_voc:
                 ast = utils.load(ast_path)
-                visitor = self.process_ast(ast, slot=word)
+                visitor = self.process_ast(ast, slot=word, include_vectorized_tokens=self.include_vectorized_tokens)
 
                 self.features.extend(visitor.feature_list)
                 self.classes.extend(visitor.classes_list)
@@ -141,7 +142,7 @@ class ASTProcessor(object):
             print("\r[AST]  --- Processing AST for file {0}/{1} ...".format(idx+1,len(self.ast_paths)), end='\r')
 
             ast = utils.load(ast_path)
-            visitor = self.process_ast(ast)
+            visitor = self.process_ast(ast, slot=None, include_vectorized_tokens=True)
 
             self.features.extend(visitor.feature_list)
             self.classes.extend(visitor.classes_list)
@@ -229,7 +230,10 @@ class ASTProcessor(object):
         if self.add_root_node:
             self.G.add_node(self.node_count, attr_dict={'train': True, 'test': False, 'val': False, 'feature': 0})
             self.id_map[self.node_count] = self.node_count
-            self.features.append(np.zeros(64+104))
+            if self.include_vectorized_tokens:
+                self.features.append(np.zeros(64+104))
+            else:
+                self.features.append(np.zeros(104))
             self.classes.append(13)
 
             for top_node in self.top_nodes:

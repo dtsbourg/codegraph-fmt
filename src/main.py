@@ -100,14 +100,14 @@ elif cfg['experiment']['graph_type'] == 'file_graph':
                               dense=cfg['experiment']['dense'])
 
 elif cfg['experiment']['graph_type'] == 'slot_graph':
-    # ast_processor.process(ast_paths=[f for f in all_ast_dump if parse_map[f] in train_files],
-    #                       save_dir=os.path.join(dumpdir, 'train'),
-    #                       verbose=cfg['run']['verbose'],
-    #                       test_ratio=1.0-cfg['experiment']['train_ratio'],
-    #                       val_ratio=cfg['experiment']['val_ratio'],
-    #                       prefix=cfg['paths']['folder'],
-    #                       dense=cfg['experiment']['dense'],
-    #                       global_voc={})
+    ast_processor.process(ast_paths=[f for f in all_ast_dump if parse_map[f] in train_files],
+                          save_dir=os.path.join(dumpdir, 'train'),
+                          verbose=cfg['run']['verbose'],
+                          test_ratio=1.0-cfg['experiment']['train_ratio'],
+                          val_ratio=cfg['experiment']['val_ratio'],
+                          prefix=cfg['paths']['folder'],
+                          dense=cfg['experiment']['dense'],
+                          global_voc={})
 
     with open(os.path.join(dumpdir, 'train', cfg['paths']['folder']+'-var_map.json')) as f:
         data = json.load(f)
