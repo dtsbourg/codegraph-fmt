@@ -52,12 +52,14 @@ SAGE-fmt/data/example-tree> git submodule add https://github.com/<username>/<clo
 
 ### 2. Generating ASTs
 
-The main interface can be configured through the `cfg` object. One can set the
+The main interface can be configured through a .yaml file. One can set the some of the
 following properties:
 
 * `cfg.datapath`: The path to the data folder - the default value should work.
 * `cfg.name`: The name of the repository to work on (the example repo is [`keras`](https://github.com/keras-team/keras))
 * `cfg.verbose`: How much logging should be displayed.
+
+>> Todo complete list
 
 The main interface then runs several consecutive actions, none of which should require much
 action for now:
