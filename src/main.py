@@ -15,7 +15,7 @@ from utils import create_dir
 import json
 
 # CFG
-with open("config-keras.yml", 'r') as ymlfile:
+with open("config-thesis.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
 path     = os.path.join(cfg['paths']['datadir'], cfg['paths']['name'], cfg['paths']['folder'])
@@ -31,8 +31,8 @@ import utils
 import ast_transformer
 import ast_processor
 
-train_files = project_crawler.crawl(os.path.join(path, 'keras'), verbose=False)
-test_files  = project_crawler.crawl(os.path.join(path, 'examples'), verbose=False)
+train_files = project_crawler.crawl(os.path.join(path, ''), verbose=False)
+test_files  = project_crawler.crawl(os.path.join(path, 'test'), verbose=False)
 
 if cfg['run']['preprocess']:
     paths = project_crawler.crawl(path, verbose=cfg['run']['verbose'])
@@ -68,6 +68,7 @@ else:
     all_ast_dump = project_crawler.crawl(astdir, filetype='.ast')
 
 if cfg['experiment']['graph_type'] == 'project_graph':
+    print([f for f in all_ast_dump if parse_map[f] in train_files])
     ast_processor.process(ast_paths=[f for f in all_ast_dump if parse_map[f] in train_files],
                           save_dir=os.path.join(dumpdir, 'train'),
                           verbose=cfg['run']['verbose'],

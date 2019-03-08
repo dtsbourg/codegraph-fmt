@@ -84,16 +84,17 @@ class ASTVisitor(ast.NodeVisitor):
                 if token_id == -1:
                     print("[WARNING] --- Found unkown token", node)
 
-                ft = feature_utils.token2vec(node, slot=self.slot)
-                one_hot_token_type = utils.one_hot_encoder(token_id, 1, min=0, max=max(AST_SYMBOL_DICT.values()))
+                if self.include_vectorized_tokens:
+                    ft = feature_utils.token2vec(node, slot=self.slot)
 
-                if np.count_nonzero(np.isnan(ft)) > 0:
-                    print("[WARNING] Found nan feature for node", node)
-                    ft = np.zeros(64)
+                    if np.count_nonzero(np.isnan(ft)) > 0:
+                        print("[WARNING] Found nan feature for node", node)
+                        ft = np.zeros(64)
+                one_hot_token_type = utils.one_hot_encoder(token_id, 1, min=0, max=max(AST_SYMBOL_DICT.values()))
                 if self.include_vectorized_tokens:
                     self.feature_list.append(np.concatenate([ft, one_hot_token_type[0]]))
                 else:
-                    self.feature_list.append(one_hot_token_type[0]))
+                    self.feature_list.append(one_hot_token_type[0])
                 self.classes_list.append(ast_utils.get_token_class_id(node))
                 node.visited = True
 

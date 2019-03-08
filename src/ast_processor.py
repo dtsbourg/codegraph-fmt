@@ -20,7 +20,7 @@ import itertools
 from ast_transformer import ASTVisitor
 from ast_utils import AST_SYMBOL_DICT, should_filter, is_func
 
-def process(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense, global_voc):
+def process(ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense, global_voc=None):
     '''
     Run the processor from within the module to avoid persistance of ASTProcessor object.
     '''
@@ -54,7 +54,7 @@ class ASTProcessor(object):
     ASTProcessor class. This is the main abstraction with which passes on the AST are done.
     It also provides an interface to dump the processed AST to networkx-compatible graphs.
     '''
-    def __init__(self, ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense, global_voc):
+    def __init__(self, ast_paths, save_dir, verbose, test_ratio, val_ratio, prefix, dense, global_voc=None):
         '''
         Args:
             ast_paths : List of paths to pre-processed ASTs (.ast/pickle format by default)
@@ -110,7 +110,7 @@ class ASTProcessor(object):
 
             for word in self.global_voc:
                 ast = utils.load(ast_path)
-                visitor = self.process_ast(ast, slot=word, include_vectorized_tokens=self.include_vectorized_tokens)
+                visitor = self.process_ast(ast, slot=word) 
 
                 self.features.extend(visitor.feature_list)
                 self.classes.extend(visitor.classes_list)
@@ -142,7 +142,7 @@ class ASTProcessor(object):
             print("\r[AST]  --- Processing AST for file {0}/{1} ...".format(idx+1,len(self.ast_paths)), end='\r')
 
             ast = utils.load(ast_path)
-            visitor = self.process_ast(ast, slot=None, include_vectorized_tokens=True)
+            visitor = self.process_ast(ast, slot=None)
 
             self.features.extend(visitor.feature_list)
             self.classes.extend(visitor.classes_list)
@@ -218,7 +218,7 @@ class ASTProcessor(object):
         Returns:
             visitor : an ASTVisitor object which contains the stack of visited nodes
         '''
-        visitor = ASTVisitor(self.verbose, slot=slot)
+        visitor = ASTVisitor(self.verbose, slot=slot, include_vectorized_tokens=self.include_vectorized_tokens)
         visitor.visit(ast) # <-- This could probably be optimized to loop just once with process_nodes
 
         return visitor

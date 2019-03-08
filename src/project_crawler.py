@@ -17,7 +17,8 @@ blacklist = [
     'setup.py',
     'autogen.py',
     'conf.py',
-    'config.py'
+    'config.py',
+    'process.py'
 ]
 
 def crawl(path, verbose=False, filetype='.py'):

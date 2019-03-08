@@ -93,6 +93,12 @@ def get_func_name(node):
 def is_var_def(node):
     return isinstance(node, Name) and not isinstance(node.ctx, Load)
 
+def is_var(node):
+    return isinstance(node, Name)
+
+def is_keyword(node):
+    return isinstance(node, keyword)
+
 def is_param(node):
     return isinstance(node, arg)
 
@@ -103,10 +109,20 @@ def is_variable(node):
     return is_var_def(node) or is_param(node) or is_attribute(node)
 
 def get_varname(node):
-    if is_var_def(node):
+    if is_var(node):
         varname = node.id
     elif is_param(node):
         varname = node.arg
     elif is_attribute(node):
         varname = node.attr
+    elif is_keyword(node):
+        varname = node.arg
     return varname
+
+
+# String literals
+def is_str(node):
+    return isinstance(node, Str)
+
+def get_str_lit(node):
+    return node.s
