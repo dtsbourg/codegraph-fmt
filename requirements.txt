@@ -1,4 +1,6 @@
 numpy
 astor>0.6
 joblib>=0.12.5
-networkx>=2.2pyyaml>=3.13
+networkx>=2.2
+pyyaml>=3.13
+gensim
