@@ -1,3 +1,4 @@
 AST-*.ast
 *.pyc
 AST-*.txt
+data/
