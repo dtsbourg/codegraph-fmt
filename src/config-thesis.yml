@@ -3,13 +3,13 @@ run:
     verbose: True
 paths:
     datadir: "../data"       # Path to the top level data directory.
-    name: "keras-example"      # Identifier for the mined directory.
-    folder: "keras"            # Raw code folder identifier.
+    name: "thesis-example"      # Identifier for the mined directory.
+    folder: "thesis"            # Raw code folder identifier.
     pregenpath: "AST"        # Pre-generated AST folder identifier.
 experiment:
     train_ratio: 0.8         # At a file level, fraction of training samples
     val_ratio: 0.2           # At a file level, fraction of validation samples
-    graph_type: "slot_graph" # Graph granularity level ("file_graph" for one graph per file, "project_graph" for one large graph)
-    train_files: ['keras']          # Directory of files to build the training graph(s) from
+    graph_type: "project_graph" # Graph granularity level ("file_graph" for one graph per file, "project_graph" for one large graph)
+    train_files: ['thesis']          # Directory of files to build the training graph(s) from
     test_files: ['examples']        # Directory of files to build the test graph(s) from
     dense: False 
