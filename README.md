@@ -102,10 +102,10 @@ SAGE-fmt/src> python parse_profiling_output.py > [readable output file]
 The library will produce the following files:
 
 * `<prefix>-feats.npy` : A numpy array containing, for each node, the set of specified features. 
-* `<prefix>-id\_map.json` : A map of unique identifiers to nodes identifiers in the generated graph.
-* `<prefix>-file\_map.json` : A map of root nodes to the source code files they connect.
-* `<prefix>-source\_map.json` : A map of node identifiers to positions in the original source files (line and column indices).
+* `<prefix>-id_map.json` : A map of unique identifiers to nodes identifiers in the generated graph.
+* `<prefix>-file_map.json` : A map of root nodes to the source code files they connect.
+* `<prefix>-source_map.json` : A map of node identifiers to positions in the original source files (line and column indices).
 * `<prefix>-G.json : A networkx compatible graph of the generated AST.
-* `<prefix>-var\_map.json` : A map of extracted variable name literals to their respective node identifiers.
-* `<prefix>-func\_map.json` : A map of extracted method name literals to their respective node identifiers.
+* `<prefix>-var_map.json` : A map of extracted variable name literals to their respective node identifiers.
+* `<prefix>-func_map.json` : A map of extracted method name literals to their respective node identifiers.
 
